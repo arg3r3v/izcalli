@@ -274,9 +274,6 @@
       let moving = false;
       let started = false;
 
-      const handBasePosition = new THREE.Vector3(0.25, -0.25, -0.5);
-      const handBaseRotationZ = 0;
-
       const raycaster = new THREE.Raycaster();
       const downVector = new THREE.Vector3(0, -1, 0);
 
@@ -574,26 +571,10 @@
             hand.components['animation-mixer']?.play();
             moving = true;
           }
-
-          if (hand) {
-            const bob = Math.sin(now * 0.012) * 0.03;
-            const sway = Math.sin(now * 0.012) * 0.14;
-            hand.object3D.position.set(
-              handBasePosition.x,
-              handBasePosition.y + bob,
-              handBasePosition.z + Math.abs(Math.sin(now * 0.012)) * 0.015
-            );
-            hand.object3D.rotation.z = handBaseRotationZ + sway;
-          }
         } else {
           if (moving) {
             hand.components['animation-mixer']?.pause();
             moving = false;
-          }
-
-          if (hand) {
-            hand.object3D.position.copy(handBasePosition);
-            hand.object3D.rotation.z = handBaseRotationZ;
           }
         }
 
