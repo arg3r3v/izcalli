@@ -175,6 +175,7 @@
 
       <a-entity id="player"
                 gltf-model="#nino"
+                visible="false"
                 animation-mixer="clip: walk; loop: repeat">
       </a-entity>
       
@@ -183,6 +184,17 @@
         <a-entity id="cameraYaw" look-controls="pointerLockEnabled: false">
           <a-entity id="cameraBoom" position="0 0 0">
             <a-entity id="gameCamera" camera>
+              <a-entity
+                id="handMarker"
+                position="0.25 -0.25 -0.5"
+                rotation="0 0 0">
+                <a-box
+                  width="0.08"
+                  height="0.08"
+                  depth="0.08"
+                  color="#d8b08c">
+                </a-box>
+              </a-entity>
               <a-entity id="cinematicScreen" visible="false">
                 <a-video
                   src="#cinematicVideo"
@@ -238,6 +250,7 @@
 
       const rig = document.querySelector('#rig');
       const player = document.querySelector('#player');
+      const handMarker = document.querySelector('#handMarker');
       const camera = document.querySelector('#gameCamera');
       const cameraYaw = document.querySelector('#cameraYaw');
       const navMeshEl = document.querySelector('#navmeshEntity');
@@ -263,6 +276,9 @@
       let lastTime = performance.now();
       let moving = false;
       let started = false;
+
+      const handBasePosition = new THREE.Vector3(0.25, -0.25, -0.5);
+      const handBaseRotationZ = 0;
 
       const raycaster = new THREE.Raycaster();
       const downVector = new THREE.Vector3(0, -1, 0);
@@ -557,10 +573,26 @@
             player.components['animation-mixer']?.play();
             moving = true;
           }
+
+          if (handMarker) {
+            const bob = Math.sin(now * 0.012) * 0.03;
+            const sway = Math.sin(now * 0.012) * 0.14;
+            handMarker.object3D.position.set(
+              handBasePosition.x,
+              handBasePosition.y + bob,
+              handBasePosition.z + Math.abs(Math.sin(now * 0.012)) * 0.015
+            );
+            handMarker.object3D.rotation.z = handBaseRotationZ + sway;
+          }
         } else {
           if (moving) {
             player.components['animation-mixer']?.pause();
             moving = false;
+          }
+
+          if (handMarker) {
+            handMarker.object3D.position.copy(handBasePosition);
+            handMarker.object3D.rotation.z = handBaseRotationZ;
           }
         }
 
