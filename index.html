@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>IZCALLI</title>
+  <title>Prueba PT</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+  <script src="https://unpkg.com/aframe-aabb-collider-component@3.2.1/dist/aframe-aabb-collider-component.min.js"></script>
   
 </head>
 
@@ -24,24 +25,6 @@
 
   #joyLeft { left: 20px; }
   #joyRight { right: 20px; }
-
-  #debugVR {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1000000;
-    background: rgba(0, 0, 0, 0.75);
-    color: #00ff00;
-    font-family: monospace;
-    font-size: 12px;
-    line-height: 1.35;
-    padding: 10px;
-    max-width: 320px;
-    max-height: 45vh;
-    overflow: auto;
-    white-space: pre-wrap;
-    pointer-events: none;
-  }
 
   html, body {
     height: 100%;
@@ -83,7 +66,6 @@
     <!-- Assets -->
     <a-assets>
       <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
-      <a-asset-item id="handModel" src="assets/hand.glb"></a-asset-item>
       <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
       <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
       <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
@@ -115,6 +97,7 @@
       <video id="video1" src="assets/video1.mp4"></video>
       <video id="video2" src="assets/video2.mp4"></video>
       <video id="video3" src="assets/video3.mp4"></video>
+      <video id="video4" src="assets/video4.mp4"></video>
 
       <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
       
@@ -176,8 +159,7 @@
 
       <a-entity id="player"
                 gltf-model="#nino"
-                visible="false"
-                animation-mixer="clip: walk; loop: repeat">
+                visible="false">
       </a-entity>
       
       <!-- CÁMARA -->
@@ -188,7 +170,7 @@
               <a-entity
                 id="hand"
                 gltf-model="#handModel"
-                position="0.25 -0.25 -0.5"
+                position="0 0 0"
                 rotation="0 0 0"
                 animation-mixer="clip: walk; loop: repeat; timeScale: 1">
               </a-entity>
@@ -247,11 +229,9 @@
 
       const rig = document.querySelector('#rig');
       const player = document.querySelector('#player');
-      const hand = document.querySelector('#hand');
       const camera = document.querySelector('#gameCamera');
       const cameraYaw = document.querySelector('#cameraYaw');
       const navMeshEl = document.querySelector('#navmeshEntity');
-      const debugVR = document.querySelector('#debugVR');
       
       const activatedTriggers = new Set();
       let canMove = true;
@@ -259,7 +239,7 @@
       const exitDistance = 1.5;
       let alreadyTriggered = false;
 
-      if (!rig || !player || !hand || !camera || !navMeshEl) {
+      if (!rig || !player || !camera || !navMeshEl) {
         console.warn('Faltan elementos rig/player/camera/navmesh');
         return;
       }
@@ -300,73 +280,6 @@
         }
 
         return false;
-      }
-
-      function updateVRDebug() {
-        if (!debugVR) return;
-
-        const lines = [];
-
-        const xrSession = scene.renderer && scene.renderer.xr ? scene.renderer.xr.getSession() : null;
-        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-
-        lines.push('XR session: ' + (xrSession ? 'activa' : 'no activa'));
-        lines.push('');
-
-        if (xrSession && xrSession.inputSources && xrSession.inputSources.length > 0) {
-          lines.push('XR inputSources:');
-
-          xrSession.inputSources.forEach((source, index) => {
-            if (!source.gamepad) return;
-
-            lines.push('Source ' + index);
-            lines.push('Axes: ' + Array.from(source.gamepad.axes).map(v => Number(v).toFixed(3)).join(', '));
-
-            source.gamepad.buttons.forEach((button, buttonIndex) => {
-              if (button.pressed || button.touched || button.value > 0) {
-                lines.push(
-                  'Btn ' + buttonIndex +
-                  ': pressed=' + button.pressed +
-                  ' touched=' + button.touched +
-                  ' value=' + Number(button.value).toFixed(3)
-                );
-              }
-            });
-
-            lines.push('');
-          });
-        } else {
-          lines.push('XR inputSources: sin datos');
-          lines.push('');
-        }
-
-        const activeGamepads = Array.from(gamepads).filter(Boolean);
-
-        if (activeGamepads.length > 0) {
-          lines.push('navigator.getGamepads():');
-
-          activeGamepads.forEach((gp, index) => {
-            lines.push('Pad ' + index + ': ' + (gp.id || 'sin id'));
-            lines.push('Axes: ' + gp.axes.map(v => Number(v).toFixed(3)).join(', '));
-
-            gp.buttons.forEach((button, buttonIndex) => {
-              if (button.pressed || button.touched || button.value > 0) {
-                lines.push(
-                  'Btn ' + buttonIndex +
-                  ': pressed=' + button.pressed +
-                  ' touched=' + button.touched +
-                  ' value=' + Number(button.value).toFixed(3)
-                );
-              }
-            });
-
-            lines.push('');
-          });
-        } else {
-          lines.push('navigator.getGamepads(): sin pads activos');
-        }
-
-        debugVR.innerHTML = lines.join('\n');
       }
 
       /* TECLADO */
@@ -419,10 +332,6 @@
         player.components['animation-mixer']?.pause();
       });
 
-      hand.addEventListener('model-loaded', () => {
-        hand.components['animation-mixer']?.pause();
-      });
-
       let cinematicPlaying = false;
       const cinematicScreen = document.getElementById("cinematicScreen");
       const cinematicVideo = document.getElementById("cinematicVideo");
@@ -431,8 +340,6 @@
         const now = performance.now();
         const delta = (now - lastTime) / 1000;
         lastTime = now;
-
-        updateVRDebug();
 
         if (cinematicPlaying) {
           requestAnimationFrame(tick);
@@ -568,12 +475,12 @@
           player.object3D.rotation.y += diff * rotationSmooth;
 
           if (!moving) {
-            hand.components['animation-mixer']?.play();
+            player.components['animation-mixer']?.play();
             moving = true;
           }
         } else {
           if (moving) {
-            hand.components['animation-mixer']?.pause();
+            player.components['animation-mixer']?.pause();
             moving = false;
           }
         }
