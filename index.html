@@ -83,6 +83,7 @@
     <!-- Assets -->
     <a-assets>
       <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
+      <a-asset-item id="handModel" src="assets/hand.glb"></a-asset-item>
       <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
       <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
       <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
@@ -185,15 +186,11 @@
           <a-entity id="cameraBoom" position="0 0 0">
             <a-entity id="gameCamera" camera>
               <a-entity
-                id="handMarker"
+                id="hand"
+                gltf-model="#handModel"
                 position="0.25 -0.25 -0.5"
-                rotation="0 0 0">
-                <a-box
-                  width="0.08"
-                  height="0.08"
-                  depth="0.08"
-                  color="#d8b08c">
-                </a-box>
+                rotation="0 0 0"
+                animation-mixer="clip: walk; loop: repeat; timeScale: 1">
               </a-entity>
               <a-entity id="cinematicScreen" visible="false">
                 <a-video
@@ -250,7 +247,7 @@
 
       const rig = document.querySelector('#rig');
       const player = document.querySelector('#player');
-      const handMarker = document.querySelector('#handMarker');
+      const hand = document.querySelector('#hand');
       const camera = document.querySelector('#gameCamera');
       const cameraYaw = document.querySelector('#cameraYaw');
       const navMeshEl = document.querySelector('#navmeshEntity');
@@ -262,7 +259,7 @@
       const exitDistance = 1.5;
       let alreadyTriggered = false;
 
-      if (!rig || !player || !camera || !navMeshEl) {
+      if (!rig || !player || !hand || !camera || !navMeshEl) {
         console.warn('Faltan elementos rig/player/camera/navmesh');
         return;
       }
@@ -425,6 +422,10 @@
         player.components['animation-mixer']?.pause();
       });
 
+      hand.addEventListener('model-loaded', () => {
+        hand.components['animation-mixer']?.pause();
+      });
+
       let cinematicPlaying = false;
       const cinematicScreen = document.getElementById("cinematicScreen");
       const cinematicVideo = document.getElementById("cinematicVideo");
@@ -570,29 +571,29 @@
           player.object3D.rotation.y += diff * rotationSmooth;
 
           if (!moving) {
-            player.components['animation-mixer']?.play();
+            hand.components['animation-mixer']?.play();
             moving = true;
           }
 
-          if (handMarker) {
+          if (hand) {
             const bob = Math.sin(now * 0.012) * 0.03;
             const sway = Math.sin(now * 0.012) * 0.14;
-            handMarker.object3D.position.set(
+            hand.object3D.position.set(
               handBasePosition.x,
               handBasePosition.y + bob,
               handBasePosition.z + Math.abs(Math.sin(now * 0.012)) * 0.015
             );
-            handMarker.object3D.rotation.z = handBaseRotationZ + sway;
+            hand.object3D.rotation.z = handBaseRotationZ + sway;
           }
         } else {
           if (moving) {
-            player.components['animation-mixer']?.pause();
+            hand.components['animation-mixer']?.pause();
             moving = false;
           }
 
-          if (handMarker) {
-            handMarker.object3D.position.copy(handBasePosition);
-            handMarker.object3D.rotation.z = handBaseRotationZ;
+          if (hand) {
+            hand.object3D.position.copy(handBasePosition);
+            hand.object3D.rotation.z = handBaseRotationZ;
           }
         }
 
