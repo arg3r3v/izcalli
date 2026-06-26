@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Prueba PT</title>
+  <title>IZCALLI</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
@@ -159,8 +159,8 @@
     <a-entity id="rig" position="0 0 0" aabb-collider="objects: .trigger">
 
       <a-entity id="player"
-                gltf-model="#handModel"
-                visible="true">
+                gltf-model="#nino"
+                visible="false">
       </a-entity>
       
       <!-- CÁMARA -->
@@ -230,9 +230,11 @@
 
       const rig = document.querySelector('#rig');
       const player = document.querySelector('#player');
+      const hand = document.querySelector('#hand');
       const camera = document.querySelector('#gameCamera');
       const cameraYaw = document.querySelector('#cameraYaw');
       const navMeshEl = document.querySelector('#navmeshEntity');
+      const debugVR = document.querySelector('#debugVR');
       
       const activatedTriggers = new Set();
       let canMove = true;
@@ -240,7 +242,7 @@
       const exitDistance = 1.5;
       let alreadyTriggered = false;
 
-      if (!rig || !player || !camera || !navMeshEl) {
+      if (!rig || !player || !hand || !camera || !navMeshEl) {
         console.warn('Faltan elementos rig/player/camera/navmesh');
         return;
       }
@@ -281,6 +283,73 @@
         }
 
         return false;
+      }
+
+      function updateVRDebug() {
+        if (!debugVR) return;
+
+        const lines = [];
+
+        const xrSession = scene.renderer && scene.renderer.xr ? scene.renderer.xr.getSession() : null;
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+
+        lines.push('XR session: ' + (xrSession ? 'activa' : 'no activa'));
+        lines.push('');
+
+        if (xrSession && xrSession.inputSources && xrSession.inputSources.length > 0) {
+          lines.push('XR inputSources:');
+
+          xrSession.inputSources.forEach((source, index) => {
+            if (!source.gamepad) return;
+
+            lines.push('Source ' + index);
+            lines.push('Axes: ' + Array.from(source.gamepad.axes).map(v => Number(v).toFixed(3)).join(', '));
+
+            source.gamepad.buttons.forEach((button, buttonIndex) => {
+              if (button.pressed || button.touched || button.value > 0) {
+                lines.push(
+                  'Btn ' + buttonIndex +
+                  ': pressed=' + button.pressed +
+                  ' touched=' + button.touched +
+                  ' value=' + Number(button.value).toFixed(3)
+                );
+              }
+            });
+
+            lines.push('');
+          });
+        } else {
+          lines.push('XR inputSources: sin datos');
+          lines.push('');
+        }
+
+        const activeGamepads = Array.from(gamepads).filter(Boolean);
+
+        if (activeGamepads.length > 0) {
+          lines.push('navigator.getGamepads():');
+
+          activeGamepads.forEach((gp, index) => {
+            lines.push('Pad ' + index + ': ' + (gp.id || 'sin id'));
+            lines.push('Axes: ' + gp.axes.map(v => Number(v).toFixed(3)).join(', '));
+
+            gp.buttons.forEach((button, buttonIndex) => {
+              if (button.pressed || button.touched || button.value > 0) {
+                lines.push(
+                  'Btn ' + buttonIndex +
+                  ': pressed=' + button.pressed +
+                  ' touched=' + button.touched +
+                  ' value=' + Number(button.value).toFixed(3)
+                );
+              }
+            });
+
+            lines.push('');
+          });
+        } else {
+          lines.push('navigator.getGamepads(): sin pads activos');
+        }
+
+        debugVR.innerHTML = lines.join('\n');
       }
 
       /* TECLADO */
@@ -329,8 +398,8 @@
       }
 
       /* ANIMACIÓN */
-      player.addEventListener('model-loaded', () => {
-        player.components['animation-mixer']?.pause();
+      hand.addEventListener('model-loaded', () => {
+        hand.components['animation-mixer']?.pause();
       });
 
       let cinematicPlaying = false;
@@ -341,6 +410,8 @@
         const now = performance.now();
         const delta = (now - lastTime) / 1000;
         lastTime = now;
+
+        updateVRDebug();
 
         if (cinematicPlaying) {
           requestAnimationFrame(tick);
@@ -476,12 +547,12 @@
           player.object3D.rotation.y += diff * rotationSmooth;
 
           if (!moving) {
-            player.components['animation-mixer']?.play();
+            hand.components['animation-mixer']?.play();
             moving = true;
           }
         } else {
           if (moving) {
-            player.components['animation-mixer']?.pause();
+            hand.components['animation-mixer']?.pause();
             moving = false;
           }
         }
