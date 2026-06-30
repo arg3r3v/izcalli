@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IZCALLI v02.4</title>
+  <title>IZCALLI v02.5</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
@@ -54,8 +54,17 @@
   <div id="debugVR">Esperando datos del control...</div>
 
   <!-- GIF de la mano -->
-  <img id="handGif" src="assets/hand.gif" crossorigin="anonymous" style="visibility:hidden;">
-  <canvas id="handFreezeCanvas" width="1080" height="1920" style="visibility:hidden;"></canvas>
+  <img
+    id="handGif"
+    src="assets/hand.gif"
+    crossorigin="anonymous"
+    loading="eager"
+    style="visibility:hidden; position:absolute; left:-9999px; top:-9999px; pointer-events:none;">
+  <canvas
+    id="handFreezeCanvas"
+    width="1080"
+    height="1920"
+    style="visibility:hidden; position:absolute; left:-9999px; top:-9999px; pointer-events:none;"></canvas>
 
   <a-scene
     vr-mode-ui="enabled: true"
@@ -71,7 +80,8 @@
   muted
   loop
   playsinline
-  webkit-playsinline>
+  webkit-playsinline
+  preload="auto">
 </video>
 
 <video
@@ -81,7 +91,8 @@
   muted
   loop
   playsinline
-  webkit-playsinline>
+  webkit-playsinline
+  preload="auto">
 </video>
 
     <a-assets>
@@ -259,11 +270,39 @@
         const handFreezeCanvas = document.getElementById('handFreezeCanvas');
         const handFreezeCtx = handFreezeCanvas.getContext('2d', { alpha: true });
 
-        // Reproducir videos storm y tv desde el inicio (están muteados para permitir autoplay)
         const stormVideo = document.getElementById('stormVideo');
         const tvVideo = document.getElementById('tvVideo');
-        if (stormVideo) stormVideo.play().catch(err => console.error(err));
-        if (tvVideo) tvVideo.play().catch(err => console.error(err));
+
+        function playLoopingVideo(videoEl) {
+          if (!videoEl) return;
+
+          videoEl.loop = true;
+          videoEl.muted = true;
+          videoEl.autoplay = true;
+          videoEl.playsInline = true;
+          videoEl.setAttribute('playsinline', '');
+          videoEl.setAttribute('webkit-playsinline', '');
+          videoEl.load();
+
+          const tryPlay = () => {
+            videoEl.play().catch(() => {});
+          };
+
+          if (videoEl.readyState >= 2) {
+            tryPlay();
+          } else {
+            videoEl.addEventListener('canplay', tryPlay, { once: true });
+            videoEl.addEventListener('loadedmetadata', tryPlay, { once: true });
+          }
+
+          videoEl.addEventListener('ended', () => {
+            videoEl.currentTime = 0;
+            videoEl.play().catch(() => {});
+          });
+        }
+
+        playLoopingVideo(stormVideo);
+        playLoopingVideo(tvVideo);
 
         const activatedTriggers = new Set();
         let cinematicPlaying = false;
@@ -299,13 +338,24 @@
           rig.setAttribute('position', `${vec3.x} ${vec3.y} ${vec3.z}`);
         }
 
+        function applyHandMaterial(srcSelector) {
+          if (!handSprite) return;
+
+          handSprite.setAttribute(
+            'material',
+            `src: ${srcSelector}; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false`
+          );
+        }
+
         function freezeHandAtCurrentFrame() {
           if (!handGif || !handFreezeCanvas || !handFreezeCtx) return;
 
           try {
+            if (!handGif.complete || handGif.naturalWidth === 0) return;
+
             handFreezeCtx.clearRect(0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
             handFreezeCtx.drawImage(handGif, 0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
-            handSprite.setAttribute('material', 'src', '#handFreezeCanvas');
+            applyHandMaterial('#handFreezeCanvas');
           } catch (err) {
             console.warn('No se pudo congelar la mano:', err);
           }
@@ -313,18 +363,20 @@
 
         function restoreAnimatedHand() {
           if (!handSprite) return;
-          handSprite.setAttribute('material', 'src', '#handGif');
+          applyHandMaterial('#handGif');
         }
 
         function showHand() {
           if (!handSprite) return;
           handSprite.setAttribute('visible', 'true');
+          handSprite.object3D.visible = true;
           restoreAnimatedHand();
         }
 
         function hideHand() {
           if (!handSprite) return;
           handSprite.setAttribute('visible', 'false');
+          handSprite.object3D.visible = false;
         }
 
         function snapRigToNavmesh() {
@@ -410,7 +462,7 @@
             lines.push('navigator.getGamepads(): sin pads activos');
           }
 
-          debugVR.textContent = lines.join('\\n');
+          debugVR.textContent = lines.join('\n');
         }
 
         window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
@@ -739,6 +791,13 @@
         scene.addEventListener('loaded', setupWhenSceneReady);
       }
     });
+
+    window.addEventListener('click', () => {
+      const stormVideo = document.getElementById('stormVideo');
+      const tvVideo = document.getElementById('tvVideo');
+      if (stormVideo) stormVideo.play().catch(() => {});
+      if (tvVideo) tvVideo.play().catch(() => {});
+    }, { once: true });
   </script>
 </body>
 </html>
