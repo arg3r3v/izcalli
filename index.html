@@ -64,25 +64,20 @@
     renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
     shadow="type: pcfsoft">
 
-    <video
-      id="stormVideo"
-      src="assets/0527.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-      webkit-playsinline>
-    </video>
-
-    <video
-      id="tvVideo"
-      src="assets/noti.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-      webkit-playsinline>
-    </video>
+    <a-video
+      src="#stormVideo"
+      position="-2.3 2.94 -3.1"
+      width="3.5"
+      height="2.3">
+    </a-video>
+    
+    <a-video
+      src="#tvVideo"
+      position="-3.46 1.88 1.941"
+      rotation="0 180 0"
+      width="0.88"
+      height="0.74">
+    </a-video>
 
     <a-assets>
       <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
