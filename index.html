@@ -73,27 +73,29 @@
     renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
     shadow="type: pcfsoft">
 
-<video
-  id="stormVideo"
-  src="assets/0527.mp4"
-  autoplay
-  muted
-  loop
-  playsinline
-  webkit-playsinline
-  preload="auto">
-</video>
+    <video
+      id="stormVideo"
+      src="assets/0527.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      preload="auto">
+    </video>
 
-<video
-  id="tvVideo"
-  src="assets/noti.mp4"
-  autoplay
-  muted
-  loop
-  playsinline
-  webkit-playsinline
-  preload="auto">
-</video>
+    <video
+      id="tvVideo"
+      src="assets/noti.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      preload="auto">
+    </video>
 
     <a-assets>
       <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
@@ -153,28 +155,24 @@
     <a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
     <a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
 
-    <!-- Planos permanentes de ambientación -->
-    <a-plane
-      id="stormPlane"
-      position="-3.2 1.6 2.8"
-      rotation="0 90 0"
-      width="2.6"
-      height="1.45"
-      material="src: #stormVideo; shader: flat; side: double; transparent: false">
-    </a-plane>
-
-    <a-plane
-      id="tvPlane"
-      position="1.9 1.45 -2.2"
-      rotation="0 180 0"
-      width="1.8"
-      height="1.0"
-      material="src: #tvVideo; shader: flat; side: double; transparent: false">
-    </a-plane>
-
     <a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
     <a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
     <a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+
+    <a-video
+      src="#stormVideo"
+      position="-2.3 2.94 -3.1"
+      width="3.5"
+      height="2.3">
+    </a-video>
+
+    <a-video
+      src="#tvVideo"
+      position="-3.46 1.88 1.941"
+      rotation="0 180 0"
+      width="0.88"
+      height="0.74">
+    </a-video>
 
     <a-box class="trigger" id="trigger1" position="-6.3 1 0.13" width="0.5" height="2" depth="1" visible="true" data-audio="audio1"></a-box>
     <a-box class="trigger" id="trigger2" position="-5.5 1 -2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio4"></a-box>
@@ -210,19 +208,19 @@
               </a-plane>
 
               <!-- Mano en GIF: se congela al dejar de moverte -->
-<a-plane
-  id="handSprite"
-  position="0 0 -1"
-  width="3"
-  height="1.7"
-  gif-texture-updater
-  material="src: #handGif;
-            shader: flat;
-            transparent: true;
-            side: double;
-            depthTest: false;
-            depthWrite: false">
-</a-plane>
+              <a-plane
+                id="handSprite"
+                position="0 0 -1"
+                width="3"
+                height="1.7"
+                gif-texture-updater
+                material="src: #handGif;
+                          shader: flat;
+                          transparent: true;
+                          side: double;
+                          depthTest: false;
+                          depthWrite: false">
+              </a-plane>
 
             </a-entity>
           </a-entity>
