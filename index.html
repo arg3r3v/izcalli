@@ -59,12 +59,12 @@
     src="assets/hand.gif"
     crossorigin="anonymous"
     loading="eager"
-    style="visibility:hidden; position:absolute; left:-9999px; top:-9999px; pointer-events:none;">
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
   <canvas
     id="handFreezeCanvas"
     width="1080"
     height="1920"
-    style="visibility:hidden; position:absolute; left:-9999px; top:-9999px; pointer-events:none;"></canvas>
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
 
   <a-scene
     vr-mode-ui="enabled: true"
@@ -153,6 +153,25 @@
     <a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
     <a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
 
+    <!-- Planos permanentes de ambientación -->
+    <a-plane
+      id="stormPlane"
+      position="-3.2 1.6 2.8"
+      rotation="0 90 0"
+      width="2.6"
+      height="1.45"
+      material="src: #stormVideo; shader: flat; side: double; transparent: false">
+    </a-plane>
+
+    <a-plane
+      id="tvPlane"
+      position="1.9 1.45 -2.2"
+      rotation="0 180 0"
+      width="1.8"
+      height="1.0"
+      material="src: #tvVideo; shader: flat; side: double; transparent: false">
+    </a-plane>
+
     <a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
     <a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
     <a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
@@ -196,6 +215,7 @@
   position="0 0 -1"
   width="3"
   height="1.7"
+  gif-texture-updater
   material="src: #handGif;
             shader: flat;
             transparent: true;
@@ -253,6 +273,21 @@
       }
     });
 
+    AFRAME.registerComponent('gif-texture-updater', {
+      tick: function () {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh || !mesh.material) return;
+
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach(material => {
+          if (material.map) {
+            material.map.needsUpdate = true;
+          }
+          material.needsUpdate = true;
+        });
+      }
+    });
+
     window.addEventListener('load', () => {
       const scene = document.querySelector('a-scene');
       const debugVR = document.querySelector('#debugVR');
@@ -273,42 +308,57 @@
         const stormVideo = document.getElementById('stormVideo');
         const tvVideo = document.getElementById('tvVideo');
 
-        function playLoopingVideo(videoEl) {
+        function startAmbientVideo(videoEl) {
           if (!videoEl) return;
 
-          videoEl.loop = true;
           videoEl.muted = true;
+          videoEl.loop = true;
           videoEl.autoplay = true;
           videoEl.playsInline = true;
+          videoEl.setAttribute('muted', '');
+          videoEl.setAttribute('loop', '');
+          videoEl.setAttribute('autoplay', '');
           videoEl.setAttribute('playsinline', '');
           videoEl.setAttribute('webkit-playsinline', '');
           videoEl.load();
 
-          const tryPlay = () => {
-            videoEl.play().catch(() => {});
+          const attemptPlay = () => {
+            const playPromise = videoEl.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => {});
+            }
           };
 
           if (videoEl.readyState >= 2) {
-            tryPlay();
+            attemptPlay();
           } else {
-            videoEl.addEventListener('canplay', tryPlay, { once: true });
-            videoEl.addEventListener('loadedmetadata', tryPlay, { once: true });
+            videoEl.addEventListener('canplay', attemptPlay, { once: true });
+            videoEl.addEventListener('loadedmetadata', attemptPlay, { once: true });
+            videoEl.addEventListener('loadeddata', attemptPlay, { once: true });
           }
 
           videoEl.addEventListener('ended', () => {
             videoEl.currentTime = 0;
-            videoEl.play().catch(() => {});
+            const playPromise = videoEl.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => {});
+            }
           });
         }
 
-        playLoopingVideo(stormVideo);
-        playLoopingVideo(tvVideo);
+        function startAllAmbientVideos() {
+          startAmbientVideo(stormVideo);
+          startAmbientVideo(tvVideo);
+        }
+
+        startAllAmbientVideos();
 
         const activatedTriggers = new Set();
         let cinematicPlaying = false;
         let moving = false;
         let started = false;
         let playerModelReady = false;
+        let handFrozen = false;
 
         const speed = 0.5;
         const rotationSmooth = 0.15;
@@ -338,6 +388,19 @@
           rig.setAttribute('position', `${vec3.x} ${vec3.y} ${vec3.z}`);
         }
 
+        function forceHandTextureUpdate() {
+          const mesh = handSprite && handSprite.getObject3D('mesh');
+          if (!mesh || !mesh.material) return;
+
+          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          materials.forEach(material => {
+            if (material.map) {
+              material.map.needsUpdate = true;
+            }
+            material.needsUpdate = true;
+          });
+        }
+
         function applyHandMaterial(srcSelector) {
           if (!handSprite) return;
 
@@ -345,6 +408,9 @@
             'material',
             `src: ${srcSelector}; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false`
           );
+
+          setTimeout(forceHandTextureUpdate, 0);
+          requestAnimationFrame(forceHandTextureUpdate);
         }
 
         function freezeHandAtCurrentFrame() {
@@ -355,6 +421,7 @@
 
             handFreezeCtx.clearRect(0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
             handFreezeCtx.drawImage(handGif, 0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
+            handFrozen = true;
             applyHandMaterial('#handFreezeCanvas');
           } catch (err) {
             console.warn('No se pudo congelar la mano:', err);
@@ -363,20 +430,20 @@
 
         function restoreAnimatedHand() {
           if (!handSprite) return;
+          handFrozen = false;
           applyHandMaterial('#handGif');
+          forceHandTextureUpdate();
         }
 
         function showHand() {
           if (!handSprite) return;
           handSprite.setAttribute('visible', 'true');
-          handSprite.object3D.visible = true;
           restoreAnimatedHand();
         }
 
         function hideHand() {
           if (!handSprite) return;
           handSprite.setAttribute('visible', 'false');
-          handSprite.object3D.visible = false;
         }
 
         function snapRigToNavmesh() {
@@ -507,6 +574,12 @@
 
           lookJoy.on('end', () => lookInput.set(0, 0));
         }
+
+        handGif.addEventListener('load', () => {
+          if (!handFrozen) {
+            restoreAnimatedHand();
+          }
+        });
 
         player.addEventListener('model-loaded', () => {
           playerModelReady = true;
@@ -792,12 +865,35 @@
       }
     });
 
-    window.addEventListener('click', () => {
+    function unlockAmbientVideos() {
       const stormVideo = document.getElementById('stormVideo');
       const tvVideo = document.getElementById('tvVideo');
-      if (stormVideo) stormVideo.play().catch(() => {});
-      if (tvVideo) tvVideo.play().catch(() => {});
-    }, { once: true });
+
+      if (stormVideo) {
+        stormVideo.muted = true;
+        stormVideo.loop = true;
+        const p1 = stormVideo.play();
+        if (p1 && typeof p1.catch === 'function') p1.catch(() => {});
+      }
+
+      if (tvVideo) {
+        tvVideo.muted = true;
+        tvVideo.loop = true;
+        const p2 = tvVideo.play();
+        if (p2 && typeof p2.catch === 'function') p2.catch(() => {});
+      }
+    }
+
+    window.addEventListener('click', unlockAmbientVideos, { once: true });
+    window.addEventListener('touchstart', unlockAmbientVideos, { once: true, passive: true });
+    window.addEventListener('pointerdown', unlockAmbientVideos, { once: true, passive: true });
+    window.addEventListener('load', unlockAmbientVideos);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        unlockAmbientVideos();
+      }
+    });
   </script>
 </body>
 </html>
