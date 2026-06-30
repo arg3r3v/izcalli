@@ -2,17 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>IZCALLI v02</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
   <script src="https://unpkg.com/aframe-aabb-collider-component@3.2.1/dist/aframe-aabb-collider-component.min.js"></script>
-  
 </head>
 
 <style>
-  /* Zona joystick*/
   #joyLeft, #joyRight {
     position: absolute;
     bottom: 20px;
@@ -26,51 +25,66 @@
   #joyLeft { left: 20px; }
   #joyRight { right: 20px; }
 
+  #debugVR {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10000;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 12px;
+    color: white;
+    background: rgba(0,0,0,0.55);
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 45vw;
+    pointer-events: none;
+  }
+
   html, body {
     height: 100%;
     margin: 0;
   }
 </style>
-  
+
 <body style="margin:0; overflow:hidden;">
 
-  <!--Zona para joystick-->
   <div id="joyLeft"></div>
   <div id="joyRight"></div>
   <div id="debugVR">Esperando datos del control...</div>
-  
-  <a-scene vr-mode-ui="enabled: true"
+
+  <a-scene
+    vr-mode-ui="enabled: true"
     fog="type: exponential; color: #000000; density: 0.15"
     background="color: #B2B2B2"
     renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
     shadow="type: pcfsoft">
-      
-    <video
-        id="stormVideo"
-        src="assets/0527.mp4"
-        autoplay
-        muted
-        loop
-        playsinline>
-      </video>
 
     <video
-        id="tvVideo"
-        src="assets/noti.mp4"
-        autoplay
-        muted
-        loop
-        playsinline>
-      </video>
-    
-    <!-- Assets -->
+      id="stormVideo"
+      src="assets/0527.mp4"
+      autoplay
+      muted
+      loop
+      playsinline>
+    </video>
+
+    <video
+      id="tvVideo"
+      src="assets/noti.mp4"
+      autoplay
+      muted
+      loop
+      playsinline>
+    </video>
+
     <a-assets>
       <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
       <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
       <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
       <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
       <a-asset-item id="handModel" src="assets/hand.glb"></a-asset-item>
-      
+
       <a-asset-item id="mesa" src="assets/mesa.glb"></a-asset-item>
       <a-asset-item id="librero" src="assets/librero.glb"></a-asset-item>
       <a-asset-item id="libros" src="assets/libros.glb"></a-asset-item>
@@ -101,7 +115,6 @@
       <video id="video4" src="assets/video4.mp4"></video>
 
       <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
-      
     </a-assets>
 
     <a-entity
@@ -110,8 +123,7 @@
       nav-mesh
       visible="false">
     </a-entity>
-    
-    <!-- Modelos -->
+
     <a-entity gltf-model="#mesa" position="0 0 0"></a-entity>
     <a-entity gltf-model="#librero" position="0 0 0"></a-entity>
     <a-entity gltf-model="#libros" position="0 0 0"></a-entity>
@@ -128,14 +140,14 @@
     <a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
     <a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
     <a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
-    
+
     <a-video
       src="#stormVideo"
       position="-2.3 2.94 -3.1"
       width="3.5"
       height="2.3">
     </a-video>
-    
+
     <a-video
       src="#tvVideo"
       position="-3.46 1.88 1.941"
@@ -144,38 +156,27 @@
       height="0.74">
     </a-video>
 
-    <!-- Trigger boxes -->
-    <a-box class="trigger" id="trigger1"  position="-6.3 1 0.13"  width="0.5" height="2" depth="1" visible="true" data-audio="audio1"></a-box>
-    <a-box class="trigger" id="trigger2"  position="-5.5 1 -2.7"  width="1" height="2" depth="0.5" visible="true" data-audio="audio4"></a-box>
-    <a-box class="trigger" id="trigger3"  position="-6.3 1 -1.5" width="0.5" height="2" depth="0.7" visible="true" data-audio="audio2"></a-box>
-    <a-box class="trigger" id="trigger4"  position="-3.45 1 2"  width="2" height="2" depth="1" visible="true" data-video="video2"></a-box>
-    <a-box class="trigger" id="trigger5"  position="-2.3 1 -2.7" width="3" height="2" depth="1" visible="true" data-video="video1"></a-box>
-    <a-box class="trigger" id="trigger6"  position="0 1 -2.7"  width="1" height="2" depth="1" visible="true" data-audio="audio6"></a-box>
-    <a-box class="trigger" id="trigger7"  position="-1.6 1 2.7"  width="1" height="2" depth="0.5" visible="true" data-video="video3"></a-box>
-    <a-box class="trigger" id="trigger8"  position="0.25 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio8"></a-box>
-    <a-box class="trigger" id="trigger9"  position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio9"></a-box>
+    <a-box class="trigger" id="trigger1" position="-6.3 1 0.13" width="0.5" height="2" depth="1" visible="true" data-audio="audio1"></a-box>
+    <a-box class="trigger" id="trigger2" position="-5.5 1 -2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio4"></a-box>
+    <a-box class="trigger" id="trigger3" position="-6.3 1 -1.5" width="0.5" height="2" depth="0.7" visible="true" data-audio="audio2"></a-box>
+    <a-box class="trigger" id="trigger4" position="-3.45 1 2" width="2" height="2" depth="1" visible="true" data-video="video2"></a-box>
+    <a-box class="trigger" id="trigger5" position="-2.3 1 -2.7" width="3" height="2" depth="1" visible="true" data-video="video1"></a-box>
+    <a-box class="trigger" id="trigger6" position="0 1 -2.7" width="1" height="2" depth="1" visible="true" data-audio="audio6"></a-box>
+    <a-box class="trigger" id="trigger7" position="-1.6 1 2.7" width="1" height="2" depth="0.5" visible="true" data-video="video3"></a-box>
+    <a-box class="trigger" id="trigger8" position="0.25 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio8"></a-box>
+    <a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio9"></a-box>
 
-    <!-- RIG -->
     <a-entity id="rig" position="0 0 0" aabb-collider="objects: .trigger">
 
       <a-entity id="player"
                 gltf-model="#nino"
                 visible="false">
       </a-entity>
-      
-      <!-- CÁMARA -->
+
       <a-entity id="cameraPivot" position="0 1.5 0">
-        <a-entity id="cameraYaw" look-controls="pointerLockEnabled: false">
+        <a-entity id="cameraYaw" look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
           <a-entity id="cameraBoom" position="0 0 0">
             <a-entity id="gameCamera" camera>
-              <!-- <a-entity
-                id="hand"
-                gltf-model="#handModel"
-                position="0.70 -0.5 -1"
-                rotation="0 15 0"
-                scale="2 2 2"
-                animation-mixer="clip: walk; loop: repeat; timeScale: 1">
-              </a-entity> -->
               <a-entity id="cinematicScreen" visible="false">
                 <a-video
                   src="#cinematicVideo"
@@ -189,490 +190,459 @@
         </a-entity>
       </a-entity>
 
+      <a-entity id="hand" gltf-model="#handModel" position="0.70 -0.5 -1" rotation="0 15 0" scale="2 2 2" animation-mixer="clip: walk; loop: repeat; timeScale: 1" visible="false"></a-entity>
+
     </a-entity>
 
-<!-- Luz 1 -->
-<a-light
-  type="point"
-  color="#ff9d3d"
-  intensity="1.2"
-  distance="4"
-  decay="2"
-  position="2 2 0">
-</a-light>
+    <a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
+    <a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
+    <a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
 
-<!-- Luz 2 -->
-<a-light
-  type="point"
-  color="#ffffff"
-  intensity="2.5"
-  distance="8"
-  decay="2"
-  position="-3.4 1.5 1">
-</a-light>
-
-<!-- Luz 3 -->
-<a-light
-  type="point"
-  color="#ff9d3d"
-  intensity="1.2"
-  distance="8"
-  decay="2"
-  position="-6 2.2 0">
-</a-light>
-    
   </a-scene>
 
-<script>
-  window.addEventListener('load', () => {
-    const scene = document.querySelector('a-scene');
-
-    scene.addEventListener('loaded', () => {
-
-      const rig = document.querySelector('#rig');
-      const player = document.querySelector('#player');
-      const hand = document.querySelector('#hand');
-      const camera = document.querySelector('#gameCamera');
-      const cameraYaw = document.querySelector('#cameraYaw');
-      const navMeshEl = document.querySelector('#navmeshEntity');
+  <script>
+    window.addEventListener('load', () => {
+      const scene = document.querySelector('a-scene');
       const debugVR = document.querySelector('#debugVR');
-      
-      const activatedTriggers = new Set();
-      let canMove = true;
 
-      const exitDistance = 1.5;
-      let alreadyTriggered = false;
+      function setupWhenSceneReady() {
+        const rig = document.querySelector('#rig');
+        const player = document.querySelector('#player');
+        const hand = document.querySelector('#hand');
+        const camera = document.querySelector('#gameCamera');
+        const cameraYaw = document.querySelector('#cameraYaw');
+        const navMeshEl = document.querySelector('#navmeshEntity');
+        const cinematicScreen = document.getElementById('cinematicScreen');
+        const cinematicVideo = document.getElementById('cinematicVideo');
 
-      if (!rig || !player || !hand || !camera || !navMeshEl) {
-        console.warn('Faltan elementos rig/player/camera/navmesh');
-        return;
-      }
+        const activatedTriggers = new Set();
+        let cinematicPlaying = false;
+        let moving = false;
+        let started = false;
 
-      const speed = 0.5;
-      const rotationSmooth = 0.15;
+        const speed = 0.5;
+        const rotationSmooth = 0.15;
+        const raycaster = new THREE.Raycaster();
+        const downVector = new THREE.Vector3(0, -1, 0);
 
-      let keys = {};
-      let nippleVector = new THREE.Vector2(0, 0);
-      let lookInput = new THREE.Vector2(0, 0);
-      let lastTime = performance.now();
-      let moving = false;
-      let started = false;
+        let keys = {};
+        let nippleVector = new THREE.Vector2(0, 0);
+        let lookInput = new THREE.Vector2(0, 0);
+        let lastTime = performance.now();
 
-      const raycaster = new THREE.Raycaster();
-      const downVector = new THREE.Vector3(0, -1, 0);
-
-      function angleDifference(a, b) {
-        let diff = b - a;
-        return Math.atan2(Math.sin(diff), Math.cos(diff));
-      }
-
-      function snapRigToNavmesh() {
-        if (!navMeshEl.object3D) return false;
-
-        navMeshEl.object3D.updateMatrixWorld(true);
-
-        const origin = rig.object3D.position.clone();
-        origin.y += 5;
-
-        raycaster.set(origin, downVector);
-
-        const intersects = raycaster.intersectObject(navMeshEl.object3D, true);
-
-        if (intersects.length > 0) {
-          rig.object3D.position.y = intersects[0].point.y;
-          return true;
-        }
-
-        return false;
-      }
-
-      function updateVRDebug() {
-        if (!debugVR) return;
-
-        const lines = [];
-
-        const xrSession = scene.renderer && scene.renderer.xr ? scene.renderer.xr.getSession() : null;
-        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-
-        lines.push('XR session: ' + (xrSession ? 'activa' : 'no activa'));
-        lines.push('');
-
-        if (xrSession && xrSession.inputSources && xrSession.inputSources.length > 0) {
-          lines.push('XR inputSources:');
-
-          xrSession.inputSources.forEach((source, index) => {
-            if (!source.gamepad) return;
-
-            lines.push('Source ' + index);
-            lines.push('Axes: ' + Array.from(source.gamepad.axes).map(v => Number(v).toFixed(3)).join(', '));
-
-            source.gamepad.buttons.forEach((button, buttonIndex) => {
-              if (button.pressed || button.touched || button.value > 0) {
-                lines.push(
-                  'Btn ' + buttonIndex +
-                  ': pressed=' + button.pressed +
-                  ' touched=' + button.touched +
-                  ' value=' + Number(button.value).toFixed(3)
-                );
-              }
-            });
-
-            lines.push('');
-          });
-        } else {
-          lines.push('XR inputSources: sin datos');
-          lines.push('');
-        }
-
-        const activeGamepads = Array.from(gamepads).filter(Boolean);
-
-        if (activeGamepads.length > 0) {
-          lines.push('navigator.getGamepads():');
-
-          activeGamepads.forEach((gp, index) => {
-            lines.push('Pad ' + index + ': ' + (gp.id || 'sin id'));
-            lines.push('Axes: ' + gp.axes.map(v => Number(v).toFixed(3)).join(', '));
-
-            gp.buttons.forEach((button, buttonIndex) => {
-              if (button.pressed || button.touched || button.value > 0) {
-                lines.push(
-                  'Btn ' + buttonIndex +
-                  ': pressed=' + button.pressed +
-                  ' touched=' + button.touched +
-                  ' value=' + Number(button.value).toFixed(3)
-                );
-              }
-            });
-
-            lines.push('');
-          });
-        } else {
-          lines.push('navigator.getGamepads(): sin pads activos');
-        }
-
-        debugVR.innerHTML = lines.join('\n');
-      }
-
-      /* TECLADO */
-      window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-      window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
-
-      /* JOYSTICKS */
-      const isTouch = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-      if (isTouch) {
-        const leftZone = document.getElementById('joyLeft');
-        const rightZone = document.getElementById('joyRight');
-
-        leftZone.style.display = 'block';
-        rightZone.style.display = 'block';
-
-        const moveJoy = nipplejs.create({
-          zone: leftZone,
-          mode: 'static',
-          position: { left: '50%', top: '50%' },
-          color: 'white',
-          size: 120
-        });
-
-        moveJoy.on('move', (evt, data) => {
-          if (!data || !data.vector) return;
-          nippleVector.set(data.vector.x, data.vector.y);
-        });
-
-        moveJoy.on('end', () => nippleVector.set(0, 0));
-
-        const lookJoy = nipplejs.create({
-          zone: rightZone,
-          mode: 'static',
-          position: { left: '50%', top: '50%' },
-          color: 'white',
-          size: 120
-        });
-
-        lookJoy.on('move', (evt, data) => {
-          if (!data || !data.vector) return;
-          lookInput.set(data.vector.x, data.vector.y);
-        });
-
-        lookJoy.on('end', () => lookInput.set(0, 0));
-      }
-
-      /* ANIMACIÓN */
-      hand.addEventListener('model-loaded', () => {
-        hand.components['animation-mixer']?.pause();
-      });
-
-      let cinematicPlaying = false;
-      const cinematicScreen = document.getElementById("cinematicScreen");
-      const cinematicVideo = document.getElementById("cinematicVideo");
-      
-      function tick() {
-        const now = performance.now();
-        const delta = (now - lastTime) / 1000;
-        lastTime = now;
-
-        updateVRDebug();
-
-        if (cinematicPlaying) {
-          requestAnimationFrame(tick);
+        if (!rig || !player || !camera || !cameraYaw || !navMeshEl) {
+          console.warn('Faltan elementos esenciales del rig/cámara/navmesh');
+          if (debugVR) debugVR.textContent = 'Faltan elementos esenciales del rig/cámara/navmesh';
           return;
         }
 
-        navMeshEl.object3D.updateMatrixWorld(true);
+        function angleDifference(a, b) {
+          const diff = b - a;
+          return Math.atan2(Math.sin(diff), Math.cos(diff));
+        }
 
-        const input = new THREE.Vector2(0, 0);
+        function setRigPosition(vec3) {
+          rig.setAttribute('position', `${vec3.x} ${vec3.y} ${vec3.z}`);
+        }
 
-        if (keys['w'] || keys['arrowup']) input.y -= 1;
-        if (keys['s'] || keys['arrowdown']) input.y += 1;
-        if (keys['a'] || keys['arrowleft']) input.x -= 1;
-        if (keys['d'] || keys['arrowright']) input.x += 1;
+        function snapRigToNavmesh() {
+          if (!navMeshEl.object3D) return false;
 
-        input.x += nippleVector.x;
-        input.y -= nippleVector.y;
+          navMeshEl.object3D.updateMatrixWorld(true);
 
-        if (navigator.getGamepads) {
-          const pads = navigator.getGamepads();
-          const gp = pads && pads[0];
+          const origin = rig.object3D.position.clone();
+          origin.y += 5;
 
-          if (gp) {
-            const axes01X = typeof gp.axes[0] === 'number' ? gp.axes[0] : 0;
-            const axes01Y = typeof gp.axes[1] === 'number' ? gp.axes[1] : 0;
-            const axes23X = typeof gp.axes[2] === 'number' ? gp.axes[2] : 0;
-            const axes23Y = typeof gp.axes[3] === 'number' ? gp.axes[3] : 0;
+          raycaster.set(origin, downVector);
+          const intersects = raycaster.intersectObject(navMeshEl.object3D, true);
 
-            const mag01 = Math.abs(axes01X) + Math.abs(axes01Y);
-            const mag23 = Math.abs(axes23X) + Math.abs(axes23Y);
+          if (intersects.length > 0) {
+            const pos = rig.object3D.position.clone();
+            pos.y = intersects[0].point.y;
+            setRigPosition(pos);
+            return true;
+          }
+
+          return false;
+        }
+
+        function updateVRDebug() {
+          if (!debugVR) return;
+
+          const lines = [];
+          const xrSession = scene.renderer && scene.renderer.xr ? scene.renderer.xr.getSession() : null;
+          const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+
+          lines.push('XR session: ' + (xrSession ? 'activa' : 'no activa'));
+          lines.push('');
+
+          if (xrSession && xrSession.inputSources && xrSession.inputSources.length > 0) {
+            lines.push('XR inputSources:');
+
+            xrSession.inputSources.forEach((source, index) => {
+              if (!source.gamepad) return;
+              lines.push('Source ' + index);
+              lines.push('Axes: ' + Array.from(source.gamepad.axes).map(v => Number(v).toFixed(3)).join(', '));
+
+              source.gamepad.buttons.forEach((button, buttonIndex) => {
+                if (button.pressed || button.touched || button.value > 0) {
+                  lines.push(
+                    'Btn ' + buttonIndex +
+                    ': pressed=' + button.pressed +
+                    ' touched=' + button.touched +
+                    ' value=' + Number(button.value).toFixed(3)
+                  );
+                }
+              });
+
+              lines.push('');
+            });
+          } else {
+            lines.push('XR inputSources: sin datos');
+            lines.push('');
+          }
+
+          const activeGamepads = Array.from(gamepads).filter(Boolean);
+
+          if (activeGamepads.length > 0) {
+            lines.push('navigator.getGamepads():');
+
+            activeGamepads.forEach((gp, index) => {
+              lines.push('Pad ' + index + ': ' + (gp.id || 'sin id'));
+              lines.push('Axes: ' + gp.axes.map(v => Number(v).toFixed(3)).join(', '));
+
+              gp.buttons.forEach((button, buttonIndex) => {
+                if (button.pressed || button.touched || button.value > 0) {
+                  lines.push(
+                    'Btn ' + buttonIndex +
+                    ': pressed=' + button.pressed +
+                    ' touched=' + button.touched +
+                    ' value=' + Number(button.value).toFixed(3)
+                  );
+                }
+              });
+
+              lines.push('');
+            });
+          } else {
+            lines.push('navigator.getGamepads(): sin pads activos');
+          }
+
+          debugVR.textContent = lines.join('\n');
+        }
+
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        const isTouch = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isTouch) {
+          const leftZone = document.getElementById('joyLeft');
+          const rightZone = document.getElementById('joyRight');
+
+          leftZone.style.display = 'block';
+          rightZone.style.display = 'block';
+
+          const moveJoy = nipplejs.create({
+            zone: leftZone,
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            color: 'white',
+            size: 120
+          });
+
+          moveJoy.on('move', (evt, data) => {
+            if (!data || !data.vector) return;
+            nippleVector.set(data.vector.x, data.vector.y);
+          });
+
+          moveJoy.on('end', () => nippleVector.set(0, 0));
+
+          const lookJoy = nipplejs.create({
+            zone: rightZone,
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            color: 'white',
+            size: 120
+          });
+
+          lookJoy.on('move', (evt, data) => {
+            if (!data || !data.vector) return;
+            lookInput.set(data.vector.x, data.vector.y);
+          });
+
+          lookJoy.on('end', () => lookInput.set(0, 0));
+        }
+
+        hand.addEventListener('model-loaded', () => {
+          if (hand.components['animation-mixer']) {
+            hand.components['animation-mixer'].pause();
+          }
+        });
+
+        function getActiveControllerInput() {
+          const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+          const activePads = Array.from(pads).filter(Boolean);
+
+          for (const gp of activePads) {
+            const a0x = typeof gp.axes[0] === 'number' ? gp.axes[0] : 0;
+            const a0y = typeof gp.axes[1] === 'number' ? gp.axes[1] : 0;
+            const a2x = typeof gp.axes[2] === 'number' ? gp.axes[2] : 0;
+            const a2y = typeof gp.axes[3] === 'number' ? gp.axes[3] : 0;
+
+            const mag01 = Math.abs(a0x) + Math.abs(a0y);
+            const mag23 = Math.abs(a2x) + Math.abs(a2y);
 
             let rawX = 0;
             let rawY = 0;
 
             if (mag23 > mag01) {
-              rawX = Math.abs(axes23X) > 0.15 ? axes23X : 0;
-              rawY = Math.abs(axes23Y) > 0.15 ? axes23Y : 0;
+              rawX = Math.abs(a2x) > 0.15 ? a2x : 0;
+              rawY = Math.abs(a2y) > 0.15 ? a2y : 0;
             } else {
-              rawX = Math.abs(axes01X) > 0.15 ? axes01X : 0;
-              rawY = Math.abs(axes01Y) > 0.15 ? axes01Y : 0;
+              rawX = Math.abs(a0x) > 0.15 ? a0x : 0;
+              rawY = Math.abs(a0y) > 0.15 ? a0y : 0;
             }
 
-            const rotatedX = rawY;
-            const rotatedY = -rawX;
+            if (rawX !== 0 || rawY !== 0) {
+              return { x: rawX, y: rawY };
+            }
 
+            let dpadX = 0;
+            let dpadY = 0;
+            if (gp.buttons[14] && gp.buttons[14].pressed) dpadX -= 1;
+            if (gp.buttons[15] && gp.buttons[15].pressed) dpadX += 1;
+            if (gp.buttons[12] && gp.buttons[12].pressed) dpadY -= 1;
+            if (gp.buttons[13] && gp.buttons[13].pressed) dpadY += 1;
+
+            if (dpadX !== 0 || dpadY !== 0) {
+              return { x: dpadX, y: dpadY };
+            }
+          }
+
+          return null;
+        }
+
+        function tick() {
+          const now = performance.now();
+          const delta = (now - lastTime) / 1000;
+          lastTime = now;
+
+          updateVRDebug();
+
+          if (cinematicPlaying) {
+            requestAnimationFrame(tick);
+            return;
+          }
+
+          navMeshEl.object3D.updateMatrixWorld(true);
+
+          const input = new THREE.Vector2(0, 0);
+
+          if (keys['w'] || keys['arrowup']) input.y -= 1;
+          if (keys['s'] || keys['arrowdown']) input.y += 1;
+          if (keys['a'] || keys['arrowleft']) input.x -= 1;
+          if (keys['d'] || keys['arrowright']) input.x += 1;
+
+          input.x += nippleVector.x;
+          input.y -= nippleVector.y;
+
+          const controllerInput = getActiveControllerInput();
+          if (controllerInput) {
+            const rotatedX = controllerInput.y;
+            const rotatedY = -controllerInput.x;
             input.x += rotatedX;
             input.y += rotatedY;
-
-            if (rotatedX === 0 && rotatedY === 0) {
-              if (gp.buttons[14] && gp.buttons[14].pressed) input.x -= 1;
-              if (gp.buttons[15] && gp.buttons[15].pressed) input.x += 1;
-              if (gp.buttons[12] && gp.buttons[12].pressed) input.y -= 1;
-              if (gp.buttons[13] && gp.buttons[13].pressed) input.y += 1;
-            }
           }
-        }
 
-        if (input.length() > 0) {
-          input.normalize();
+          if (input.length() > 0) {
+            input.normalize();
 
-          const forward = new THREE.Vector3();
-          camera.object3D.getWorldDirection(forward);
-          forward.y = 0;
-          forward.normalize();
+            const forward = new THREE.Vector3();
+            camera.object3D.getWorldDirection(forward);
+            forward.y = 0;
+            if (forward.lengthSq() === 0) forward.set(0, 0, -1);
+            forward.normalize();
 
-          const right = new THREE.Vector3();
-          right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+            const right = new THREE.Vector3();
+            right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
 
-          const moveVector = new THREE.Vector3();
-          moveVector.addScaledVector(forward, input.y);
-          moveVector.addScaledVector(right, -input.x);
+            const moveVector = new THREE.Vector3();
+            moveVector.addScaledVector(forward, input.y);
+            moveVector.addScaledVector(right, -input.x);
 
-          const subSteps = 8;
-          const cornerFriction = 0.5;
+            const subSteps = 8;
+            const cornerFriction = 0.5;
+            const totalMove = moveVector.clone().multiplyScalar(speed * delta);
+            const stepMove = totalMove.clone().divideScalar(subSteps);
 
-          const totalMove = moveVector.clone().multiplyScalar(speed * delta);
-          const stepMove = totalMove.clone().divideScalar(subSteps);
+            let currentPosition = rig.object3D.position.clone();
 
-          let currentPosition = rig.object3D.position.clone();
+            for (let i = 0; i < subSteps; i++) {
+              let moved = false;
 
-          for (let i = 0; i < subSteps; i++) {
-            let moved = false;
+              let testFull = currentPosition.clone().add(stepMove);
+              let origin = testFull.clone();
+              origin.y += 5;
 
-            let testFull = currentPosition.clone().add(stepMove);
-            let origin = testFull.clone();
-            origin.y += 5;
+              raycaster.set(origin, downVector);
+              let intersects = raycaster.intersectObject(navMeshEl.object3D, true);
 
-            raycaster.set(origin, downVector);
-            let intersects = raycaster.intersectObject(navMeshEl.object3D, true);
+              if (intersects.length > 0) {
+                currentPosition.copy(testFull);
+                currentPosition.y = intersects[0].point.y;
+                moved = true;
+              }
 
-            if (intersects.length > 0) {
-              currentPosition.copy(testFull);
-              currentPosition.y = intersects[0].point.y;
-              moved = true;
-            }
+              if (!moved) {
+                const tryAxis = (axis, amount) => {
+                  let reduced = amount;
 
-            if (!moved) {
-              const tryAxis = (axis, amount) => {
-                let reduced = amount;
+                  for (let r = 0; r < 3; r++) {
+                    let test = currentPosition.clone();
+                    test[axis] += reduced;
 
-                for (let r = 0; r < 3; r++) {
-                  let test = currentPosition.clone();
-                  test[axis] += reduced;
+                    let o = test.clone();
+                    o.y += 5;
 
-                  let o = test.clone();
-                  o.y += 5;
+                    raycaster.set(o, downVector);
+                    let hits = raycaster.intersectObject(navMeshEl.object3D, true);
 
-                  raycaster.set(o, downVector);
-                  let hits = raycaster.intersectObject(navMeshEl.object3D, true);
+                    if (hits.length > 0) {
+                      currentPosition[axis] = test[axis];
+                      currentPosition.y = hits[0].point.y;
+                      return true;
+                    }
 
-                  if (hits.length > 0) {
-                    currentPosition[axis] = test[axis];
-                    currentPosition.y = hits[0].point.y;
-                    return true;
+                    reduced *= cornerFriction;
                   }
+                  return false;
+                };
 
-                  reduced *= cornerFriction;
+                tryAxis('x', stepMove.x);
+                tryAxis('z', stepMove.z);
+              }
+            }
+
+            setRigPosition(currentPosition);
+
+            const moveAngle = Math.atan2(moveVector.x, moveVector.z);
+            const targetRotation = moveAngle + Math.PI;
+            const currentRotation = player.object3D.rotation.y;
+            const diff = angleDifference(currentRotation, targetRotation);
+            player.object3D.rotation.y += diff * rotationSmooth;
+
+            if (!moving) {
+              if (hand && hand.components['animation-mixer']) {
+                hand.components['animation-mixer'].play();
+              }
+              moving = true;
+            }
+          } else {
+            if (moving) {
+              if (hand && hand.components['animation-mixer']) {
+                hand.components['animation-mixer'].pause();
+              }
+              moving = false;
+            }
+          }
+
+          snapRigToNavmesh();
+
+          const look = cameraYaw.components['look-controls'];
+          if (look) {
+            const rotSpeed = 1.5;
+
+            if (!(scene.is('vr-mode'))) {
+              look.yawObject.rotation.y -= lookInput.x * rotSpeed * delta;
+              look.pitchObject.rotation.x -= lookInput.y * rotSpeed * delta;
+
+              const maxPitch = Math.PI / 2 - 0.1;
+              look.pitchObject.rotation.x = Math.max(
+                -maxPitch,
+                Math.min(maxPitch, look.pitchObject.rotation.x)
+              );
+            }
+          }
+
+          document.querySelectorAll('.trigger').forEach(trigger => {
+            const triggerId = trigger.id;
+            if (activatedTriggers.has(triggerId)) return;
+
+            const playerPos = rig.object3D.position.clone();
+            const triggerPos = new THREE.Vector3();
+            trigger.object3D.getWorldPosition(triggerPos);
+            const distance = playerPos.distanceTo(triggerPos);
+
+            if (distance < 1.2) {
+              activatedTriggers.add(triggerId);
+
+              const audioId = trigger.getAttribute('data-audio');
+              const videoId = trigger.getAttribute('data-video');
+
+              if (audioId) {
+                const audio = document.getElementById(audioId);
+                if (!audio) {
+                  console.warn('No existe:', audioId);
+                } else {
+                  audio.currentTime = 0;
+                  audio.play().catch(err => console.error(err));
                 }
-                return false;
-              };
-
-              tryAxis("x", stepMove.x);
-              tryAxis("z", stepMove.z);
-            }
-          }
-
-          rig.object3D.position.copy(currentPosition);
-
-          const moveAngle = Math.atan2(moveVector.x, moveVector.z);
-          const targetRotation = moveAngle + Math.PI;
-          const currentRotation = player.object3D.rotation.y;
-          const diff = angleDifference(currentRotation, targetRotation);
-          player.object3D.rotation.y += diff * rotationSmooth;
-
-          if (!moving) {
-            hand.components['animation-mixer']?.play();
-            moving = true;
-          }
-        } else {
-          if (moving) {
-            hand.components['animation-mixer']?.pause();
-            moving = false;
-          }
-        }
-
-        /* Ajuste altura navmesh */
-        snapRigToNavmesh();
-
-        /* ROTACIÓN CÁMARA */
-        const look = cameraYaw.components['look-controls'];
-        if (look) {
-          const rotSpeed = 1.5;
-
-          look.yawObject.rotation.y -= lookInput.x * rotSpeed * delta;
-          look.pitchObject.rotation.x -= lookInput.y * rotSpeed * delta;
-
-          const maxPitch = Math.PI / 2 - 0.1;
-          look.pitchObject.rotation.x = Math.max(
-            -maxPitch,
-            Math.min(maxPitch, look.pitchObject.rotation.x)
-          );
-        }
-
-        /* ===== TRIGGERS ===== */
-        document.querySelectorAll(".trigger").forEach(trigger => {
-
-          const triggerId = trigger.id;
-
-          if (activatedTriggers.has(triggerId)) return;
-
-          const playerPos = rig.object3D.position.clone();
-
-          const triggerPos = new THREE.Vector3();
-          trigger.object3D.getWorldPosition(triggerPos);
-
-          const distance = playerPos.distanceTo(triggerPos);
-
-          if (distance < 1.2) {
-
-            activatedTriggers.add(triggerId);
-
-            const audioId = trigger.getAttribute("data-audio");
-            const videoId = trigger.getAttribute("data-video");
-
-            /* AUDIO */
-            if (audioId) {
-
-              const audio = document.getElementById(audioId);
-
-              if (!audio) {
-                console.warn("No existe:", audioId);
-                return;
               }
 
-              audio.currentTime = 0;
+              if (videoId) {
+                const video = document.getElementById(videoId);
+                if (!video) {
+                  console.warn('No existe:', videoId);
+                } else {
+                  cinematicPlaying = true;
+                  cinematicScreen.setAttribute('visible', 'true');
 
-              audio.play()
-                .then(() => {
-                  console.log("Audio:", audioId);
-                })
-                .catch(err => {
-                  console.error(err);
-                });
-            }
+                  cinematicVideo.pause();
+                  cinematicVideo.currentTime = 0;
+                  cinematicVideo.src = video.src;
+                  cinematicVideo.load();
 
-            /* VIDEO CINEMÁTICO */
-            if (videoId) {
+                  cinematicVideo.oncanplay = () => {
+                    cinematicVideo.play().catch(err => console.error(err));
+                  };
 
-              const video = document.getElementById(videoId);
-
-              if (!video) {
-                console.warn("No existe:", videoId);
-                return;
+                  cinematicVideo.onended = () => {
+                    cinematicVideo.pause();
+                    cinematicScreen.setAttribute('visible', 'false');
+                    cinematicPlaying = false;
+                  };
+                }
               }
-
-              cinematicPlaying = true;
-              cinematicScreen.setAttribute("visible", "true");
-
-              cinematicVideo.pause();
-              cinematicVideo.currentTime = 0;
-              cinematicVideo.src = video.src;
-              cinematicVideo.load();
-
-              cinematicVideo.oncanplay = () => {
-                cinematicVideo.play().catch(err => {
-                  console.error(err);
-                });
-              };
-
-              cinematicVideo.onended = () => {
-                cinematicVideo.pause();
-                cinematicScreen.setAttribute("visible", "false");
-                cinematicPlaying = false;
-              };
             }
+          });
+
+          requestAnimationFrame(tick);
+        }
+
+        navMeshEl.addEventListener('model-loaded', () => {
+          console.log('Navmesh cargado');
+          if (!started) {
+            started = true;
+            snapRigToNavmesh();
+            tick();
           }
         });
-
-        requestAnimationFrame(tick);
       }
 
-      navMeshEl.addEventListener('model-loaded', () => {
-        console.log('Navmesh cargado');
-
-        if (!started) {
-          started = true;
-          snapRigToNavmesh();
-          tick();
-        }
-      });
-
+      if (scene.hasLoaded) {
+        setupWhenSceneReady();
+      } else {
+        scene.addEventListener('loaded', setupWhenSceneReady);
+      }
     });
-  });
-  
-  window.addEventListener('click', () => {
-    document.getElementById('stormVideo').play();
-    document.getElementById('tvVideo').play();
-  }, { once: true });
-  
-</script>
 
+    window.addEventListener('click', () => {
+      const stormVideo = document.getElementById('stormVideo');
+      const tvVideo = document.getElementById('tvVideo');
+      if (stormVideo) stormVideo.play().catch(() => {});
+      if (tvVideo) tvVideo.play().catch(() => {});
+    }, { once: true });
+  </script>
 </body>
 </html>
