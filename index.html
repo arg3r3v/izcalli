@@ -53,19 +53,6 @@
   <div id="joyRight"></div>
   <div id="debugVR">Esperando datos del control...</div>
 
-  <!-- GIF de la mano -->
-  <img
-    id="handGif"
-    src="assets/hand.gif"
-    crossorigin="anonymous"
-    loading="eager"
-    style="position:fixed; left:0; top:0; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;">
-  <canvas
-    id="handFreezeCanvas"
-    width="1080"
-    height="1920"
-    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
-
   <a-scene
     vr-mode-ui="enabled: true"
     fog="type: exponential; color: #000000; density: 0.15"
@@ -132,6 +119,7 @@
       <video id="video3" src="assets/video3.mp4"></video>
       <video id="video4" src="assets/video4.mp4"></video>
 
+      <video id="handVideo" src="assets/hand.webm" preload="auto" muted playsinline webkit-playsinline></video>
       <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
     </a-assets>
 
@@ -207,19 +195,13 @@
                 material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
               </a-plane>
 
-              <!-- Mano en GIF: se congela al dejar de moverte -->
               <a-plane
                 id="handSprite"
-                position="0 0 -1"
-                width="3"
-                height="1.7"
-                gif-texture-updater
-                material="src: #handGif;
-                          shader: flat;
-                          transparent: true;
-                          side: double;
-                          depthTest: false;
-                          depthWrite: false">
+                position="0 0 -0.5"
+                width="2"
+                height="2"
+                visible="false"
+                material="src:#handVideo; shader:flat; transparent:true; side:double; depthTest:false; depthWrite:false">
               </a-plane>
 
             </a-entity>
@@ -270,19 +252,6 @@
         });
       }
     });
-
-    AFRAME.registerComponent('gif-texture-updater', {
-      tick: function () {
-        const mesh = this.el.getObject3D('mesh');
-        if (!mesh || !mesh.material) return;
-
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        materials.forEach(material => {
-          if (material.map) {
-            material.map.needsUpdate = true;
-          }
-          material.needsUpdate = true;
-        });
       }
     });
 
@@ -299,9 +268,7 @@
         const cinematicScreen = document.getElementById('cinematicScreen');
         const cinematicVideo = document.getElementById('cinematicVideo');
         const handSprite = document.getElementById('handSprite');
-        const handGif = document.getElementById('handGif');
-        const handFreezeCanvas = document.getElementById('handFreezeCanvas');
-        const handFreezeCtx = handFreezeCanvas.getContext('2d', { alpha: true });
+        const handVideo = document.getElementById("handVideo");
 
         const stormVideo = document.getElementById('stormVideo');
         const tvVideo = document.getElementById('tvVideo');
@@ -351,12 +318,19 @@
 
         startAllAmbientVideos();
 
+        if (handVideo) {
+          handVideo.pause();
+          handVideo.currentTime = 0;
+          handVideo.loop = false;
+          handVideo.muted = true;
+          handVideo.playsInline = true;
+        }
+
         const activatedTriggers = new Set();
         let cinematicPlaying = false;
         let moving = false;
         let started = false;
         let playerModelReady = false;
-        let handFrozen = false;
 
         const speed = 0.5;
         const rotationSmooth = 0.15;
@@ -384,64 +358,24 @@
 
         function setRigPosition(vec3) {
           rig.setAttribute('position', `${vec3.x} ${vec3.y} ${vec3.z}`);
-        }
-
-        function forceHandTextureUpdate() {
-          const mesh = handSprite && handSprite.getObject3D('mesh');
-          if (!mesh || !mesh.material) return;
-
-          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-          materials.forEach(material => {
-            if (material.map) {
-              material.map.needsUpdate = true;
-            }
-            material.needsUpdate = true;
-          });
-        }
-
-        function applyHandMaterial(srcSelector) {
-          if (!handSprite) return;
-
-          handSprite.setAttribute(
-            'material',
-            `src: ${srcSelector}; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false`
-          );
-
-          setTimeout(forceHandTextureUpdate, 0);
-          requestAnimationFrame(forceHandTextureUpdate);
-        }
-
-        function freezeHandAtCurrentFrame() {
-          if (!handGif || !handFreezeCanvas || !handFreezeCtx) return;
-
-          try {
-            if (!handGif.complete || handGif.naturalWidth === 0) return;
-
-            handFreezeCtx.clearRect(0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
-            handFreezeCtx.drawImage(handGif, 0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
-            handFrozen = true;
-            applyHandMaterial('#handFreezeCanvas');
-          } catch (err) {
-            console.warn('No se pudo congelar la mano:', err);
+        }        function showHand() {
+          if (!handSprite || !handVideo) return;
+          handSprite.setAttribute("visible", true);
+          if (handVideo.paused) {
+            handVideo.play().catch(()=>{});
           }
         }
 
-        function restoreAnimatedHand() {
-          if (!handSprite) return;
-          handFrozen = false;
-          applyHandMaterial('#handGif');
-          forceHandTextureUpdate();
-        }
-
-        function showHand() {
-          if (!handSprite) return;
-          handSprite.setAttribute('visible', 'true');
-          restoreAnimatedHand();
-        }
-
         function hideHand() {
-          if (!handSprite) return;
-          handSprite.setAttribute('visible', 'false');
+          if (!handSprite || !handVideo) return;
+          handVideo.pause();
+          handVideo.currentTime = 0;
+          handSprite.setAttribute("visible", false);
+        }
+
+        function stopHand() {
+          if (!handVideo) return;
+          handVideo.pause();
         }
 
         function snapRigToNavmesh() {
@@ -572,12 +506,6 @@
 
           lookJoy.on('end', () => lookInput.set(0, 0));
         }
-
-        handGif.addEventListener('load', () => {
-          if (!handFrozen) {
-            restoreAnimatedHand();
-          }
-        });
 
         player.addEventListener('model-loaded', () => {
           playerModelReady = true;
@@ -783,9 +711,12 @@
               showHand();
               moving = true;
             }
+            if (handVideo && handVideo.readyState >= 2) {
+              handVideo.play().catch(()=>{});
+            }
           } else {
             if (moving) {
-              freezeHandAtCurrentFrame();
+              stopHand();
               moving = false;
             }
           }
