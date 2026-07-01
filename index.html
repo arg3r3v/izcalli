@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IZCALLI v02.6</title>
+  <title>IZCALLI v02.5</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
@@ -52,6 +52,19 @@
   <div id="joyLeft"></div>
   <div id="joyRight"></div>
   <div id="debugVR">Esperando datos del control...</div>
+
+  <!-- GIF de la mano -->
+  <img
+    id="handGif"
+    src="assets/hand.gif"
+    crossorigin="anonymous"
+    loading="eager"
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
+  <canvas
+    id="handFreezeCanvas"
+    width="1080"
+    height="1920"
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
 
   <a-scene
     vr-mode-ui="enabled: true"
@@ -120,7 +133,6 @@
       <video id="video4" src="assets/video4.mp4"></video>
 
       <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
-      <video id="handVideo" src="assets/hand.webm" preload="auto" muted playsinline webkit-playsinline></video>
     </a-assets>
 
     <a-entity
@@ -173,13 +185,19 @@
     <a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio9"></a-box>
 
     <a-entity id="rig" position="0 0 0">
-      <a-entity id="player" gltf-model="#nino" visible="false"></a-entity>
+
+      <!-- Mesh del niño: queda como cuerpo de referencia/collision proxy -->
+      <a-entity id="player"
+                gltf-model="#nino"
+                visible="false">
+      </a-entity>
 
       <a-entity id="cameraPivot" position="0 1.5 0">
         <a-entity id="cameraYaw" look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
           <a-entity id="cameraBoom" position="0 0 0">
             <a-entity id="gameCamera" camera>
 
+              <!-- Video cinematográfico fijo frente a la cámara -->
               <a-plane
                 id="cinematicScreen"
                 visible="false"
@@ -189,24 +207,32 @@
                 material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
               </a-plane>
 
+              <!-- Mano en GIF: se congela al dejar de moverte -->
               <a-plane
                 id="handSprite"
-                position="0 0 -0.5"
-                width="2"
-                height="2"
-                visible="false"
-                material="src:#handVideo; shader:flat; transparent:true; side:double; depthTest:false; depthWrite:false">
+                position="0 0 -1"
+                width="3"
+                height="1.7"
+                gif-texture-updater
+                material="src: #handGif;
+                          shader: flat;
+                          transparent: true;
+                          side: double;
+                          depthTest: false;
+                          depthWrite: false">
               </a-plane>
 
             </a-entity>
           </a-entity>
         </a-entity>
       </a-entity>
+
     </a-entity>
 
     <a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
     <a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
     <a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
+
   </a-scene>
 
   <script>
@@ -245,6 +271,21 @@
       }
     });
 
+    AFRAME.registerComponent('gif-texture-updater', {
+      tick: function () {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh || !mesh.material) return;
+
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach(material => {
+          if (material.map) {
+            material.map.needsUpdate = true;
+          }
+          material.needsUpdate = true;
+        });
+      }
+    });
+
     window.addEventListener('load', () => {
       const scene = document.querySelector('a-scene');
       const debugVR = document.querySelector('#debugVR');
@@ -258,7 +299,9 @@
         const cinematicScreen = document.getElementById('cinematicScreen');
         const cinematicVideo = document.getElementById('cinematicVideo');
         const handSprite = document.getElementById('handSprite');
-        const handVideo = document.getElementById('handVideo');
+        const handGif = document.getElementById('handGif');
+        const handFreezeCanvas = document.getElementById('handFreezeCanvas');
+        const handFreezeCtx = handFreezeCanvas.getContext('2d', { alpha: true });
 
         const stormVideo = document.getElementById('stormVideo');
         const tvVideo = document.getElementById('tvVideo');
@@ -308,22 +351,12 @@
 
         startAllAmbientVideos();
 
-        if (handVideo) {
-          handVideo.pause();
-          handVideo.currentTime = 0;
-          handVideo.loop = false;
-          handVideo.muted = true;
-          handVideo.playsInline = true;
-          handVideo.setAttribute('muted', '');
-          handVideo.setAttribute('playsinline', '');
-          handVideo.setAttribute('webkit-playsinline', '');
-        }
-
         const activatedTriggers = new Set();
         let cinematicPlaying = false;
         let moving = false;
         let started = false;
         let playerModelReady = false;
+        let handFrozen = false;
 
         const speed = 0.5;
         const rotationSmooth = 0.15;
@@ -353,25 +386,62 @@
           rig.setAttribute('position', `${vec3.x} ${vec3.y} ${vec3.z}`);
         }
 
-        function showHand() {
-          if (!handSprite || !handVideo) return;
-          handSprite.setAttribute("visible", true);
+        function forceHandTextureUpdate() {
+          const mesh = handSprite && handSprite.getObject3D('mesh');
+          if (!mesh || !mesh.material) return;
 
-          if (handVideo.paused) {
-            handVideo.play().catch(() => {});
+          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          materials.forEach(material => {
+            if (material.map) {
+              material.map.needsUpdate = true;
+            }
+            material.needsUpdate = true;
+          });
+        }
+
+        function applyHandMaterial(srcSelector) {
+          if (!handSprite) return;
+
+          handSprite.setAttribute(
+            'material',
+            `src: ${srcSelector}; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false`
+          );
+
+          setTimeout(forceHandTextureUpdate, 0);
+          requestAnimationFrame(forceHandTextureUpdate);
+        }
+
+        function freezeHandAtCurrentFrame() {
+          if (!handGif || !handFreezeCanvas || !handFreezeCtx) return;
+
+          try {
+            if (!handGif.complete || handGif.naturalWidth === 0) return;
+
+            handFreezeCtx.clearRect(0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
+            handFreezeCtx.drawImage(handGif, 0, 0, handFreezeCanvas.width, handFreezeCanvas.height);
+            handFrozen = true;
+            applyHandMaterial('#handFreezeCanvas');
+          } catch (err) {
+            console.warn('No se pudo congelar la mano:', err);
           }
         }
 
-        function hideHand() {
-          if (!handSprite || !handVideo) return;
-          handVideo.pause();
-          handVideo.currentTime = 0;
-          handSprite.setAttribute("visible", false);
+        function restoreAnimatedHand() {
+          if (!handSprite) return;
+          handFrozen = false;
+          applyHandMaterial('#handGif');
+          forceHandTextureUpdate();
         }
 
-        function stopHand() {
-          if (!handVideo) return;
-          handVideo.pause();
+        function showHand() {
+          if (!handSprite) return;
+          handSprite.setAttribute('visible', 'true');
+          restoreAnimatedHand();
+        }
+
+        function hideHand() {
+          if (!handSprite) return;
+          handSprite.setAttribute('visible', 'false');
         }
 
         function snapRigToNavmesh() {
@@ -502,6 +572,12 @@
 
           lookJoy.on('end', () => lookInput.set(0, 0));
         }
+
+        handGif.addEventListener('load', () => {
+          if (!handFrozen) {
+            restoreAnimatedHand();
+          }
+        });
 
         player.addEventListener('model-loaded', () => {
           playerModelReady = true;
@@ -707,12 +783,9 @@
               showHand();
               moving = true;
             }
-            if (handVideo && handVideo.readyState >= 2) {
-              handVideo.play().catch(() => {});
-            }
           } else {
             if (moving) {
-              stopHand();
+              freezeHandAtCurrentFrame();
               moving = false;
             }
           }
@@ -735,6 +808,8 @@
             }
           }
 
+          // Colisiones / activación usando el mesh del niño como referencia real.
+          // Si el modelo todavía no ha cargado, se mantiene el chequeo visual por distancia como respaldo.
           if (playerModelReady) {
             player.object3D.updateMatrixWorld(true);
             playerBox.setFromObject(player.object3D);
