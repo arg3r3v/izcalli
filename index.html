@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IZCALLI v02.7</title>
+  <title>IZCALLI v02.6</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
@@ -119,8 +119,8 @@
       <video id="video3" src="assets/video3.mp4"></video>
       <video id="video4" src="assets/video4.mp4"></video>
 
-      <video id="handVideo" src="assets/hand.webm" preload="auto" muted playsinline webkit-playsinline></video>
       <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
+      <video id="handVideo" src="assets/hand.webm" preload="auto" muted playsinline webkit-playsinline></video>
     </a-assets>
 
     <a-entity
@@ -173,19 +173,13 @@
     <a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio9"></a-box>
 
     <a-entity id="rig" position="0 0 0">
-
-      <!-- Mesh del niño: queda como cuerpo de referencia/collision proxy -->
-      <a-entity id="player"
-                gltf-model="#nino"
-                visible="false">
-      </a-entity>
+      <a-entity id="player" gltf-model="#nino" visible="false"></a-entity>
 
       <a-entity id="cameraPivot" position="0 1.5 0">
         <a-entity id="cameraYaw" look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
           <a-entity id="cameraBoom" position="0 0 0">
             <a-entity id="gameCamera" camera>
 
-              <!-- Video cinematográfico fijo frente a la cámara -->
               <a-plane
                 id="cinematicScreen"
                 visible="false"
@@ -208,13 +202,11 @@
           </a-entity>
         </a-entity>
       </a-entity>
-
     </a-entity>
 
     <a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
     <a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
     <a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
-
   </a-scene>
 
   <script>
@@ -252,8 +244,6 @@
         });
       }
     });
-      }
-    });
 
     window.addEventListener('load', () => {
       const scene = document.querySelector('a-scene');
@@ -268,7 +258,7 @@
         const cinematicScreen = document.getElementById('cinematicScreen');
         const cinematicVideo = document.getElementById('cinematicVideo');
         const handSprite = document.getElementById('handSprite');
-        const handVideo = document.getElementById("handVideo");
+        const handVideo = document.getElementById('handVideo');
 
         const stormVideo = document.getElementById('stormVideo');
         const tvVideo = document.getElementById('tvVideo');
@@ -324,6 +314,9 @@
           handVideo.loop = false;
           handVideo.muted = true;
           handVideo.playsInline = true;
+          handVideo.setAttribute('muted', '');
+          handVideo.setAttribute('playsinline', '');
+          handVideo.setAttribute('webkit-playsinline', '');
         }
 
         const activatedTriggers = new Set();
@@ -358,11 +351,14 @@
 
         function setRigPosition(vec3) {
           rig.setAttribute('position', `${vec3.x} ${vec3.y} ${vec3.z}`);
-        }        function showHand() {
+        }
+
+        function showHand() {
           if (!handSprite || !handVideo) return;
           handSprite.setAttribute("visible", true);
+
           if (handVideo.paused) {
-            handVideo.play().catch(()=>{});
+            handVideo.play().catch(() => {});
           }
         }
 
@@ -712,7 +708,7 @@
               moving = true;
             }
             if (handVideo && handVideo.readyState >= 2) {
-              handVideo.play().catch(()=>{});
+              handVideo.play().catch(() => {});
             }
           } else {
             if (moving) {
@@ -739,8 +735,6 @@
             }
           }
 
-          // Colisiones / activación usando el mesh del niño como referencia real.
-          // Si el modelo todavía no ha cargado, se mantiene el chequeo visual por distancia como respaldo.
           if (playerModelReady) {
             player.object3D.updateMatrixWorld(true);
             playerBox.setFromObject(player.object3D);
