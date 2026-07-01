@@ -53,13 +53,13 @@
   <div id="joyRight"></div>
   <div id="debugVR">Esperando datos del control...</div>
 
-  <!-- GIF de la mano -->
   <img
     id="handGif"
     src="assets/hand.gif"
     crossorigin="anonymous"
     loading="eager"
     style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
+
   <canvas
     id="handFreezeCanvas"
     width="1080"
@@ -186,18 +186,16 @@
 
     <a-entity id="rig" position="0 0 0">
 
-      <!-- Mesh del niño: queda como cuerpo de referencia/collision proxy -->
       <a-entity id="player"
                 gltf-model="#nino"
                 visible="false">
       </a-entity>
 
       <a-entity id="cameraPivot" position="0 1.5 0">
-        <a-entity id="cameraYaw" look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
+        <a-entity id="cameraYaw" position="0 0 0">
           <a-entity id="cameraBoom" position="0 0 0">
-            <a-entity id="gameCamera" camera>
+            <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
 
-              <!-- Video cinematográfico fijo frente a la cámara -->
               <a-plane
                 id="cinematicScreen"
                 visible="false"
@@ -207,7 +205,6 @@
                 material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
               </a-plane>
 
-              <!-- Mano en GIF: se congela al dejar de moverte -->
               <a-plane
                 id="handSprite"
                 position="0 0 -1"
@@ -294,7 +291,6 @@
         const rig = document.querySelector('#rig');
         const player = document.querySelector('#player');
         const camera = document.querySelector('#gameCamera');
-        const cameraYaw = document.querySelector('#cameraYaw');
         const navMeshEl = document.querySelector('#navmeshEntity');
         const cinematicScreen = document.getElementById('cinematicScreen');
         const cinematicVideo = document.getElementById('cinematicVideo');
@@ -360,6 +356,10 @@
 
         const speed = 0.5;
         const rotationSmooth = 0.15;
+        const deadZone = 0.15;
+        const headTurnSpeed = 1.0;
+        const headTurnThreshold = 0.0005;
+
         const raycaster = new THREE.Raycaster();
         const downVector = new THREE.Vector3(0, -1, 0);
 
@@ -370,8 +370,9 @@
         let nippleVector = new THREE.Vector2(0, 0);
         let lookInput = new THREE.Vector2(0, 0);
         let lastTime = performance.now();
+        let lastHeadYaw = null;
 
-        if (!rig || !player || !camera || !cameraYaw || !navMeshEl) {
+        if (!rig || !player || !camera || !navMeshEl) {
           console.warn('Faltan elementos esenciales del rig/cámara/navmesh');
           if (debugVR) debugVR.textContent = 'Faltan elementos esenciales del rig/cámara/navmesh';
           return;
@@ -530,6 +531,30 @@
           debugVR.textContent = lines.join('\n');
         }
 
+        function getFlatViewBasis() {
+          const quat = new THREE.Quaternion();
+          const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+          camera.object3D.getWorldQuaternion(quat);
+          euler.setFromQuaternion(quat, 'YXZ');
+
+          const yaw = euler.y;
+
+          const forward = new THREE.Vector3(
+            Math.sin(yaw),
+            0,
+            -Math.cos(yaw)
+          );
+
+          const right = new THREE.Vector3(
+            Math.cos(yaw),
+            0,
+            Math.sin(yaw)
+          );
+
+          return { forward, right };
+        }
+
         window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
         window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
@@ -584,6 +609,55 @@
         });
 
         function getActiveControllerInput() {
+          const xrSession =
+            scene.renderer &&
+            scene.renderer.xr &&
+            scene.renderer.xr.getSession
+              ? scene.renderer.xr.getSession()
+              : null;
+
+          if (xrSession && xrSession.inputSources) {
+            for (const source of xrSession.inputSources) {
+              if (!source.gamepad) continue;
+
+              const gp = source.gamepad;
+
+              const a0x = typeof gp.axes[0] === 'number' ? gp.axes[0] : 0;
+              const a0y = typeof gp.axes[1] === 'number' ? gp.axes[1] : 0;
+              const a2x = typeof gp.axes[2] === 'number' ? gp.axes[2] : 0;
+              const a2y = typeof gp.axes[3] === 'number' ? gp.axes[3] : 0;
+
+              const mag01 = Math.abs(a0x) + Math.abs(a0y);
+              const mag23 = Math.abs(a2x) + Math.abs(a2y);
+
+              let rawX = 0;
+              let rawY = 0;
+
+              if (mag23 > mag01) {
+                rawX = Math.abs(a2x) > deadZone ? a2x : 0;
+                rawY = Math.abs(a2y) > deadZone ? a2y : 0;
+              } else {
+                rawX = Math.abs(a0x) > deadZone ? a0x : 0;
+                rawY = Math.abs(a0y) > deadZone ? a0y : 0;
+              }
+
+              if (rawX !== 0 || rawY !== 0) {
+                return { x: rawX, y: rawY };
+              }
+
+              let dpadX = 0;
+              let dpadY = 0;
+              if (gp.buttons[14] && gp.buttons[14].pressed) dpadX -= 1;
+              if (gp.buttons[15] && gp.buttons[15].pressed) dpadX += 1;
+              if (gp.buttons[12] && gp.buttons[12].pressed) dpadY += 1;
+              if (gp.buttons[13] && gp.buttons[13].pressed) dpadY -= 1;
+
+              if (dpadX !== 0 || dpadY !== 0) {
+                return { x: dpadX, y: dpadY };
+              }
+            }
+          }
+
           const pads = navigator.getGamepads ? navigator.getGamepads() : [];
           const activePads = Array.from(pads).filter(Boolean);
 
@@ -600,11 +674,11 @@
             let rawY = 0;
 
             if (mag23 > mag01) {
-              rawX = Math.abs(a2x) > 0.15 ? a2x : 0;
-              rawY = Math.abs(a2y) > 0.15 ? a2y : 0;
+              rawX = Math.abs(a2x) > deadZone ? a2x : 0;
+              rawY = Math.abs(a2y) > deadZone ? a2y : 0;
             } else {
-              rawX = Math.abs(a0x) > 0.15 ? a0x : 0;
-              rawY = Math.abs(a0y) > 0.15 ? a0y : 0;
+              rawX = Math.abs(a0x) > deadZone ? a0x : 0;
+              rawY = Math.abs(a0y) > deadZone ? a0y : 0;
             }
 
             if (rawX !== 0 || rawY !== 0) {
@@ -615,8 +689,8 @@
             let dpadY = 0;
             if (gp.buttons[14] && gp.buttons[14].pressed) dpadX -= 1;
             if (gp.buttons[15] && gp.buttons[15].pressed) dpadX += 1;
-            if (gp.buttons[12] && gp.buttons[12].pressed) dpadY -= 1;
-            if (gp.buttons[13] && gp.buttons[13].pressed) dpadY += 1;
+            if (gp.buttons[12] && gp.buttons[12].pressed) dpadY += 1;
+            if (gp.buttons[13] && gp.buttons[13].pressed) dpadY -= 1;
 
             if (dpadX !== 0 || dpadY !== 0) {
               return { x: dpadX, y: dpadY };
@@ -696,27 +770,55 @@
 
           const controllerInput = getActiveControllerInput();
           if (controllerInput) {
-            const rotatedX = controllerInput.y;
-            const rotatedY = -controllerInput.x;
-            input.x += rotatedX;
-            input.y += rotatedY;
+            input.x += controllerInput.x;
+            input.y += controllerInput.y;
+          }
+
+          const vrMode = scene.is && scene.is('vr-mode');
+
+          if (vrMode) {
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            euler.setFromQuaternion(camera.object3D.quaternion, 'YXZ');
+
+            const currentHeadYaw = euler.y;
+
+            if (lastHeadYaw === null) {
+              lastHeadYaw = currentHeadYaw;
+            } else {
+              const deltaYaw = angleDifference(lastHeadYaw, currentHeadYaw);
+
+              if (Math.abs(deltaYaw) > headTurnThreshold) {
+                rig.object3D.rotation.y += deltaYaw * headTurnSpeed;
+              }
+
+              lastHeadYaw = currentHeadYaw;
+            }
+          } else {
+            lastHeadYaw = null;
+
+            const look = camera.components['look-controls'];
+            if (look) {
+              const rotSpeed = 1.5;
+
+              look.yawObject.rotation.y -= lookInput.x * rotSpeed * delta;
+              look.pitchObject.rotation.x -= lookInput.y * rotSpeed * delta;
+
+              const maxPitch = Math.PI / 2 - 0.1;
+              look.pitchObject.rotation.x = Math.max(
+                -maxPitch,
+                Math.min(maxPitch, look.pitchObject.rotation.x)
+              );
+            }
           }
 
           if (input.length() > 0) {
             input.normalize();
 
-            const forward = new THREE.Vector3();
-            camera.object3D.getWorldDirection(forward);
-            forward.y = 0;
-            if (forward.lengthSq() === 0) forward.set(0, 0, -1);
-            forward.normalize();
-
-            const right = new THREE.Vector3();
-            right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+            const basis = getFlatViewBasis();
 
             const moveVector = new THREE.Vector3();
-            moveVector.addScaledVector(forward, input.y);
-            moveVector.addScaledVector(right, -input.x);
+            moveVector.addScaledVector(basis.forward, -input.y);
+            moveVector.addScaledVector(basis.right, input.x);
 
             const subSteps = 8;
             const cornerFriction = 0.5;
@@ -792,24 +894,6 @@
 
           snapRigToNavmesh();
 
-          const look = cameraYaw.components['look-controls'];
-          if (look) {
-            const rotSpeed = 1.5;
-
-            if (!(scene.is('vr-mode'))) {
-              look.yawObject.rotation.y -= lookInput.x * rotSpeed * delta;
-              look.pitchObject.rotation.x -= lookInput.y * rotSpeed * delta;
-
-              const maxPitch = Math.PI / 2 - 0.1;
-              look.pitchObject.rotation.x = Math.max(
-                -maxPitch,
-                Math.min(maxPitch, look.pitchObject.rotation.x)
-              );
-            }
-          }
-
-          // Colisiones / activación usando el mesh del niño como referencia real.
-          // Si el modelo todavía no ha cargado, se mantiene el chequeo visual por distancia como respaldo.
           if (playerModelReady) {
             player.object3D.updateMatrixWorld(true);
             playerBox.setFromObject(player.object3D);
