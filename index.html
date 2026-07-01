@@ -1,24 +1,50 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IZCALLI v02.8</title>
+  <title>IZCALLI v02.5</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+
   <script src="https://unpkg.com/aframe-aabb-collider-component@3.2.1/dist/aframe-aabb-collider-component.min.js"></script>
 
   <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: #000;
+      touch-action: none;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+    }
+
+    a-scene {
+      width: 100vw;
+      height: 100vh;
+    }
+
     #joyLeft, #joyRight {
       position: absolute;
       bottom: 20px;
       width: 160px;
       height: 160px;
       touch-action: none;
-      display: none;
+      opacity: 0;
       z-index: 9999;
+      transition: opacity 0.12s linear;
+      pointer-events: auto;
     }
 
     #joyLeft { left: 20px; }
@@ -40,195 +66,198 @@
       pointer-events: none;
     }
 
-    html, body {
-      height: 100%;
-      margin: 0;
+    #fullscreenBtn {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      z-index: 10001;
+      font-family: sans-serif;
+      font-size: 14px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.9);
+      color: #111;
+      display: none;
     }
   </style>
+
 </head>
 
-<body style="margin:0; overflow:hidden;">
-
+<body>
   <div id="joyLeft"></div>
   <div id="joyRight"></div>
   <div id="debugVR">Esperando datos del control...</div>
+  <button id="fullscreenBtn" type="button">Pantalla completa</button>
 
-  <img
-    id="handGif"
-    src="assets/hand.gif"
-    crossorigin="anonymous"
-    loading="eager"
-    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
+<img
+ id="handGif"
+ src="assets/hand.gif"
+ crossorigin="anonymous"
+ loading="eager"
+ style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
 
-  <canvas
-    id="handFreezeCanvas"
-    width="1080"
-    height="1920"
-    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
+<canvas
+ id="handFreezeCanvas"
+ width="1080"
+ height="1920"
+ style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
 
-  <a-scene
-    vr-mode-ui="enabled: true"
-    fog="type: exponential; color: #000000; density: 0.15"
-    background="color: #B2B2B2"
-    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
-    shadow="type: pcfsoft">
+<a-scene
+ vr-mode-ui="enabled: true"
+ fog="type: exponential; color: #000000; density: 0.15"
+ background="color: #B2B2B2"
+ renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
+ shadow="type: pcfsoft">
 
-    <video
-      id="stormVideo"
-      src="assets/0527.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-      webkit-playsinline
-      crossorigin="anonymous"
-      preload="auto">
-    </video>
+```
+<video
+  id="stormVideo"
+  src="assets/0527.mp4"
+  autoplay
+  muted
+  loop
+  playsinline
+  webkit-playsinline
+  crossorigin="anonymous"
+  preload="auto">
+</video>
 
-    <video
-      id="tvVideo"
-      src="assets/noti.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-      webkit-playsinline
-      crossorigin="anonymous"
-      preload="auto">
-    </video>
+<video
+  id="tvVideo"
+  src="assets/noti.mp4"
+  autoplay
+  muted
+  loop
+  playsinline
+  webkit-playsinline
+  crossorigin="anonymous"
+  preload="auto">
+</video>
 
-    <a-assets>
-      <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
-      <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
-      <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
-      <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
+<a-assets>
+  <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
+  <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
+  <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
+  <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
 
-      <a-asset-item id="mesa" src="assets/mesa.glb"></a-asset-item>
-      <a-asset-item id="librero" src="assets/librero.glb"></a-asset-item>
-      <a-asset-item id="libros" src="assets/libros.glb"></a-asset-item>
-      <a-asset-item id="sillon" src="assets/sillon.glb"></a-asset-item>
-      <a-asset-item id="tele" src="assets/tele.glb"></a-asset-item>
-      <a-asset-item id="cuadros" src="assets/cuadros.glb"></a-asset-item>
-      <a-asset-item id="velasyplatos" src="assets/velasyplatos.glb"></a-asset-item>
-      <a-asset-item id="salon" src="assets/salon.glb"></a-asset-item>
-      <a-asset-item id="puertas" src="assets/puertas.glb"></a-asset-item>
-      <a-asset-item id="altar" src="assets/altar.glb"></a-asset-item>
-      <a-asset-item id="perchero" src="assets/perchero.glb"></a-asset-item>
-      <a-asset-item id="plantas" src="assets/plantas.glb"></a-asset-item>
-      <a-asset-item id="navmesh" src="assets/navmesh.glb"></a-asset-item>
+  <a-asset-item id="mesa" src="assets/mesa.glb"></a-asset-item>
+  <a-asset-item id="librero" src="assets/librero.glb"></a-asset-item>
+  <a-asset-item id="libros" src="assets/libros.glb"></a-asset-item>
+  <a-asset-item id="sillon" src="assets/sillon.glb"></a-asset-item>
+  <a-asset-item id="tele" src="assets/tele.glb"></a-asset-item>
+  <a-asset-item id="cuadros" src="assets/cuadros.glb"></a-asset-item>
+  <a-asset-item id="velasyplatos" src="assets/velasyplatos.glb"></a-asset-item>
+  <a-asset-item id="salon" src="assets/salon.glb"></a-asset-item>
+  <a-asset-item id="puertas" src="assets/puertas.glb"></a-asset-item>
+  <a-asset-item id="altar" src="assets/altar.glb"></a-asset-item>
+  <a-asset-item id="perchero" src="assets/perchero.glb"></a-asset-item>
+  <a-asset-item id="plantas" src="assets/plantas.glb"></a-asset-item>
+  <a-asset-item id="navmesh" src="assets/navmesh.glb"></a-asset-item>
 
-      <audio id="audio1" src="assets/audio1.mp3"></audio>
-      <audio id="audio2" src="assets/audio2.mp3"></audio>
-      <audio id="audio3" src="assets/audio3.mp3"></audio>
-      <audio id="audio4" src="assets/audio4.mp3"></audio>
-      <audio id="audio5" src="assets/audio5.mp3"></audio>
-      <audio id="audio6" src="assets/audio6.mp3"></audio>
-      <audio id="audio7" src="assets/audio7.mp3"></audio>
-      <audio id="audio8" src="assets/audio8.mp3"></audio>
-      <audio id="audio9" src="assets/audio9.mp3"></audio>
+  <audio id="audio1" src="assets/audio1.mp3"></audio>
+  <audio id="audio2" src="assets/audio2.mp3"></audio>
+  <audio id="audio3" src="assets/audio3.mp3"></audio>
+  <audio id="audio4" src="assets/audio4.mp3"></audio>
+  <audio id="audio5" src="assets/audio5.mp3"></audio>
+  <audio id="audio6" src="assets/audio6.mp3"></audio>
+  <audio id="audio7" src="assets/audio7.mp3"></audio>
+  <audio id="audio8" src="assets/audio8.mp3"></audio>
+  <audio id="audio9" src="assets/audio9.mp3"></audio>
 
-      <video id="video1" src="assets/video1.mp4"></video>
-      <video id="video2" src="assets/video2.mp4"></video>
-      <video id="video3" src="assets/video3.mp4"></video>
-      <video id="video4" src="assets/video4.mp4"></video>
+  <video id="video1" src="assets/video1.mp4"></video>
+  <video id="video2" src="assets/video2.mp4"></video>
+  <video id="video3" src="assets/video3.mp4"></video>
+  <video id="video4" src="assets/video4.mp4"></video>
 
-      <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
-    </a-assets>
+  <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
+</a-assets>
 
-    <a-entity
-      id="navmeshEntity"
-      gltf-model="#navmesh"
-      nav-mesh
-      visible="false">
-    </a-entity>
+<a-entity
+  id="navmeshEntity"
+  gltf-model="#navmesh"
+  nav-mesh
+  visible="false">
+</a-entity>
 
-    <a-entity gltf-model="#mesa" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#librero" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#libros" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#salon" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#sillon" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#tele" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#cuadros" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#velasyplatos" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#puertas" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#altar" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
-    <a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
+<a-entity gltf-model="#mesa" position="0 0 0"></a-entity>
+<a-entity gltf-model="#librero" position="0 0 0"></a-entity>
+<a-entity gltf-model="#libros" position="0 0 0"></a-entity>
+<a-entity gltf-model="#salon" position="0 0 0"></a-entity>
+<a-entity gltf-model="#sillon" position="0 0 0"></a-entity>
+<a-entity gltf-model="#tele" position="0 0 0"></a-entity>
+<a-entity gltf-model="#cuadros" position="0 0 0"></a-entity>
+<a-entity gltf-model="#velasyplatos" position="0 0 0"></a-entity>
+<a-entity gltf-model="#puertas" position="0 0 0"></a-entity>
+<a-entity gltf-model="#altar" position="0 0 0"></a-entity>
+<a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
+<a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
 
-    <a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
-    <a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
-    <a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+<a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
+<a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+<a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
 
-    <a-video
-      src="#stormVideo"
-      position="-2.3 2.94 -3.1"
-      width="3.5"
-      height="2.3">
-    </a-video>
+<a-video
+  src="#stormVideo"
+  position="-2.3 2.94 -3.1"
+  width="3.5"
+  height="2.3">
+</a-video>
 
-    <a-video
-      src="#tvVideo"
-      position="-3.46 1.88 1.941"
-      rotation="0 180 0"
-      width="0.88"
-      height="0.74">
-    </a-video>
+<a-video
+  src="#tvVideo"
+  position="-3.46 1.88 1.941"
+  rotation="0 180 0"
+  width="0.88"
+  height="0.74">
+</a-video>
 
-    <a-box class="trigger" id="trigger1" position="-6.3 1 0.13" width="0.5" height="2" depth="1" visible="true" data-audio="audio1"></a-box>
-    <a-box class="trigger" id="trigger2" position="-5.5 1 -2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio4"></a-box>
-    <a-box class="trigger" id="trigger3" position="-6.3 1 -1.5" width="0.5" height="2" depth="0.7" visible="true" data-audio="audio2"></a-box>
-    <a-box class="trigger" id="trigger4" position="-3.45 1 2" width="2" height="2" depth="1" visible="true" data-video="video2"></a-box>
-    <a-box class="trigger" id="trigger5" position="-2.3 1 -2.7" width="3" height="2" depth="1" visible="true" data-video="video1"></a-box>
-    <a-box class="trigger" id="trigger6" position="0 1 -2.7" width="1" height="2" depth="1" visible="true" data-audio="audio6"></a-box>
-    <a-box class="trigger" id="trigger7" position="-1.6 1 2.7" width="1" height="2" depth="0.5" visible="true" data-video="video3"></a-box>
-    <a-box class="trigger" id="trigger8" position="0.25 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio8"></a-box>
-    <a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio9"></a-box>
+<a-box class="trigger" id="trigger1" position="-6.3 1 0.13" width="0.5" height="2" depth="1" visible="true" data-audio="audio1"></a-box>
+<a-box class="trigger" id="trigger2" position="-5.5 1 -2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio4"></a-box>
+<a-box class="trigger" id="trigger3" position="-6.3 1 -1.5" width="0.5" height="2" depth="0.7" visible="true" data-audio="audio2"></a-box>
+<a-box class="trigger" id="trigger4" position="-3.45 1 2" width="2" height="2" depth="1" visible="true" data-video="video2"></a-box>
+<a-box class="trigger" id="trigger5" position="-2.3 1 -2.7" width="3" height="2" depth="1" visible="true" data-video="video1"></a-box>
+<a-box class="trigger" id="trigger6" position="0 1 -2.7" width="1" height="2" depth="1" visible="true" data-audio="audio6"></a-box>
+<a-box class="trigger" id="trigger7" position="-1.6 1 2.7" width="1" height="2" depth="0.5" visible="true" data-video="video3"></a-box>
+<a-box class="trigger" id="trigger8" position="0.25 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio8"></a-box>
+<a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="true" data-audio="audio9"></a-box>
 
-    <a-entity id="rig" position="0 0 0">
+<a-entity id="rig" position="0 0 0">
+  <a-entity id="player" gltf-model="#nino" visible="false"></a-entity>
 
-      <a-entity id="player"
-                gltf-model="#nino"
-                visible="false">
-      </a-entity>
+  <a-entity id="cameraPivot" position="0 1.5 0">
+    <a-entity id="cameraYaw" position="0 0 0">
+      <a-entity id="cameraBoom" position="0 0 0">
+        <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
 
-      <a-entity id="cameraPivot" position="0 1.5 0">
-        <a-entity id="cameraYaw" position="0 0 0">
-          <a-entity id="cameraBoom" position="0 0 0">
-            <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
+          <a-plane
+            id="cinematicScreen"
+            visible="false"
+            position="0 0 -0.8"
+            width="4"
+            height="2.25"
+            material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
+          </a-plane>
 
-              <a-plane
-                id="cinematicScreen"
-                visible="false"
-                position="0 0 -0.8"
-                width="4"
-                height="2.25"
-                material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
-              </a-plane>
+          <a-plane
+            id="handSprite"
+            position="0 0 -1"
+            width="3"
+            height="1.7"
+            gif-texture-updater
+            material="src: #handGif; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
+          </a-plane>
 
-              <a-plane
-                id="handSprite"
-                position="0 0 -1"
-                width="3"
-                height="1.7"
-                gif-texture-updater
-                material="src: #handGif;
-                          shader: flat;
-                          transparent: true;
-                          side: double;
-                          depthTest: false;
-                          depthWrite: false">
-              </a-plane>
-
-            </a-entity>
-          </a-entity>
         </a-entity>
       </a-entity>
-
     </a-entity>
+  </a-entity>
+</a-entity>
 
-    <a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
-    <a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
-    <a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
+<a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
+<a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
+<a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
+```
 
   </a-scene>
 
@@ -283,9 +312,58 @@
       }
     });
 
+    function requestFullscreenIfPossible() {
+      const el = document.documentElement;
+
+      try {
+        if (document.fullscreenElement) return Promise.resolve(true);
+
+        if (el.requestFullscreen) {
+          return el.requestFullscreen().then(() => true).catch(() => false);
+        }
+        if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+          return Promise.resolve(true);
+        }
+        if (el.msRequestFullscreen) {
+          el.msRequestFullscreen();
+          return Promise.resolve(true);
+        }
+      } catch (err) {
+        return Promise.resolve(false);
+      }
+
+      return Promise.resolve(false);
+    }
+
+    function setupFullscreenHandlers() {
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+      const tryEnter = () => {
+        requestFullscreenIfPossible().then(ok => {
+          if (fullscreenBtn) fullscreenBtn.style.display = ok ? 'none' : 'block';
+        });
+      };
+
+      if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', tryEnter);
+      }
+
+      window.addEventListener('pointerdown', tryEnter, { once: true, passive: true });
+      window.addEventListener('touchstart', tryEnter, { once: true, passive: true });
+      window.addEventListener('click', tryEnter, { once: true });
+      window.addEventListener('load', tryEnter, { once: true });
+
+      document.addEventListener('fullscreenchange', () => {
+        if (fullscreenBtn) fullscreenBtn.style.display = document.fullscreenElement ? 'none' : 'block';
+      });
+    }
+
     window.addEventListener('load', () => {
       const scene = document.querySelector('a-scene');
       const debugVR = document.querySelector('#debugVR');
+
+      setupFullscreenHandlers();
 
       function setupWhenSceneReady() {
         const rig = document.querySelector('#rig');
@@ -301,6 +379,14 @@
 
         const stormVideo = document.getElementById('stormVideo');
         const tvVideo = document.getElementById('tvVideo');
+        const joyLeft = document.getElementById('joyLeft');
+        const joyRight = document.getElementById('joyRight');
+
+        function setJoyVisible(visible) {
+          const opacity = visible ? '1' : '0';
+          if (joyLeft) joyLeft.style.opacity = opacity;
+          if (joyRight) joyRight.style.opacity = opacity;
+        }
 
         function startAmbientVideo(videoEl) {
           if (!videoEl) return;
@@ -561,41 +647,46 @@
         const isTouch = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
         if (isTouch) {
-          const leftZone = document.getElementById('joyLeft');
-          const rightZone = document.getElementById('joyRight');
-
-          leftZone.style.display = 'block';
-          rightZone.style.display = 'block';
+          if (joyLeft) joyLeft.style.opacity = '0';
+          if (joyRight) joyRight.style.opacity = '0';
 
           const moveJoy = nipplejs.create({
-            zone: leftZone,
+            zone: joyLeft,
             mode: 'static',
             position: { left: '50%', top: '50%' },
             color: 'white',
             size: 120
           });
 
+          moveJoy.on('start', () => setJoyVisible(true));
           moveJoy.on('move', (evt, data) => {
+            setJoyVisible(true);
             if (!data || !data.vector) return;
             nippleVector.set(data.vector.x, data.vector.y);
           });
-
-          moveJoy.on('end', () => nippleVector.set(0, 0));
+          moveJoy.on('end', () => {
+            nippleVector.set(0, 0);
+            setJoyVisible(false);
+          });
 
           const lookJoy = nipplejs.create({
-            zone: rightZone,
+            zone: joyRight,
             mode: 'static',
             position: { left: '50%', top: '50%' },
             color: 'white',
             size: 120
           });
 
+          lookJoy.on('start', () => setJoyVisible(true));
           lookJoy.on('move', (evt, data) => {
+            setJoyVisible(true);
             if (!data || !data.vector) return;
             lookInput.set(data.vector.x, data.vector.y);
           });
-
-          lookJoy.on('end', () => lookInput.set(0, 0));
+          lookJoy.on('end', () => {
+            lookInput.set(0, 0);
+            setJoyVisible(false);
+          });
         }
 
         handGif.addEventListener('load', () => {
@@ -977,5 +1068,6 @@
       }
     });
   </script>
+
 </body>
 </html>
