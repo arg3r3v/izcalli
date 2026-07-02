@@ -90,6 +90,8 @@
   <div id="debugVR">Esperando datos del control...</div>
   <button id="fullscreenBtn" type="button">Pantalla completa</button>
 
+
+
 <img
  id="handGif"
  src="assets/hand.gif"
@@ -110,7 +112,6 @@
  renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
  shadow="type: pcfsoft">
 
-```
 <video
   id="stormVideo"
   src="assets/0527.mp4"
@@ -169,6 +170,8 @@
   <video id="video2" src="assets/video2.mp4"></video>
   <video id="video3" src="assets/video3.mp4"></video>
   <video id="video4" src="assets/video4.mp4"></video>
+
+  <video id="introVideo" src="assets/intro.mp4" preload="auto" playsinline webkit-playsinline crossorigin="anonymous" muted></video>
 
   <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
 </a-assets>
@@ -231,6 +234,15 @@
         <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
 
           <a-plane
+            id="introScreen"
+            visible="false"
+            position="0 0 -0.8"
+            width="4"
+            height="2.25"
+            material="src: #introVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
+          </a-plane>
+
+          <a-plane
             id="cinematicScreen"
             visible="false"
             position="0 0 -0.8"
@@ -257,9 +269,8 @@
 <a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
 <a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
 <a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
-```
 
-  </a-scene>
+</a-scene>
 
   <script>
     AFRAME.registerComponent('hud-quad', {
@@ -370,6 +381,8 @@
         const player = document.querySelector('#player');
         const camera = document.querySelector('#gameCamera');
         const navMeshEl = document.querySelector('#navmeshEntity');
+        const introScreen = document.getElementById('introScreen');
+        const introVideo = document.getElementById('introVideo');
         const cinematicScreen = document.getElementById('cinematicScreen');
         const cinematicVideo = document.getElementById('cinematicVideo');
         const handSprite = document.getElementById('handSprite');
@@ -439,6 +452,8 @@
         let started = false;
         let playerModelReady = false;
         let handFrozen = false;
+        let introFinished = false;
+        let navmeshReady = false;
 
         const speed = 0.5;
         const rotationSmooth = 0.15;
@@ -1020,9 +1035,55 @@
           requestAnimationFrame(tick);
         }
 
+        function hideIntroAndStartExperience() {
+          if (introScreen) {
+            introScreen.setAttribute('visible', 'false');
+          }
+          if (introVideo) {
+            introVideo.pause();
+          }
+          introFinished = true;
+          if (navmeshReady && !started) {
+            started = true;
+            snapRigToNavmesh();
+            hideHand();
+            tick();
+          }
+        }
+
+        if (introScreen && introVideo) {
+          introScreen.setAttribute('visible', 'true');
+          introVideo.loop = false;
+          introVideo.muted = true;
+          introVideo.setAttribute('muted', '');
+          introVideo.setAttribute('playsinline', '');
+          introVideo.setAttribute('webkit-playsinline', '');
+          introVideo.load();
+
+          const playIntro = () => {
+            const p = introVideo.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(() => {});
+            }
+          };
+
+          if (introVideo.readyState >= 2) {
+            playIntro();
+          } else {
+            introVideo.addEventListener('canplay', playIntro, { once: true });
+            introVideo.addEventListener('loadedmetadata', playIntro, { once: true });
+            introVideo.addEventListener('loadeddata', playIntro, { once: true });
+          }
+
+          introVideo.onended = hideIntroAndStartExperience;
+        } else {
+          introFinished = true;
+        }
+
         navMeshEl.addEventListener('model-loaded', () => {
           console.log('Navmesh cargado');
-          if (!started) {
+          navmeshReady = true;
+          if (introFinished && !started) {
             started = true;
             snapRigToNavmesh();
             hideHand();
