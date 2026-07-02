@@ -90,194 +90,194 @@
   <div id="debugVR">Esperando datos del control...</div>
   <button id="fullscreenBtn" type="button">Pantalla completa</button>
 
+  <img
+    id="handGif"
+    src="assets/hand.gif"
+    crossorigin="anonymous"
+    loading="eager"
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
 
+  <canvas
+    id="handFreezeCanvas"
+    width="1080"
+    height="1920"
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
 
-<img
- id="handGif"
- src="assets/hand.gif"
- crossorigin="anonymous"
- loading="eager"
- style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
+  <a-scene
+    vr-mode-ui="enabled: true"
+    fog="type: exponential; color: #000000; density: 0.15"
+    background="color: #B2B2B2"
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
+    shadow="type: pcfsoft">
 
-<canvas
- id="handFreezeCanvas"
- width="1080"
- height="1920"
- style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
+    <video
+      id="stormVideo"
+      src="assets/0527.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      preload="auto">
+    </video>
 
-<a-scene
- vr-mode-ui="enabled: true"
- fog="type: exponential; color: #000000; density: 0.15"
- background="color: #B2B2B2"
- renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
- shadow="type: pcfsoft">
+    <video
+      id="tvVideo"
+      src="assets/noti.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      preload="auto">
+    </video>
 
-<video
-  id="stormVideo"
-  src="assets/0527.mp4"
-  autoplay
-  muted
-  loop
-  playsinline
-  webkit-playsinline
-  crossorigin="anonymous"
-  preload="auto">
-</video>
+    <a-assets>
+      <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
+      <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
+      <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
+      <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
 
-<video
-  id="tvVideo"
-  src="assets/noti.mp4"
-  autoplay
-  muted
-  loop
-  playsinline
-  webkit-playsinline
-  crossorigin="anonymous"
-  preload="auto">
-</video>
+      <a-asset-item id="mesa" src="assets/mesa.glb"></a-asset-item>
+      <a-asset-item id="librero" src="assets/librero.glb"></a-asset-item>
+      <a-asset-item id="libros" src="assets/libros.glb"></a-asset-item>
+      <a-asset-item id="sillon" src="assets/sillon.glb"></a-asset-item>
+      <a-asset-item id="tele" src="assets/tele.glb"></a-asset-item>
+      <a-asset-item id="cuadros" src="assets/cuadros.glb"></a-asset-item>
+      <a-asset-item id="velasyplatos" src="assets/velasyplatos.glb"></a-asset-item>
+      <a-asset-item id="salon" src="assets/salon.glb"></a-asset-item>
+      <a-asset-item id="puertas" src="assets/puertas.glb"></a-asset-item>
+      <a-asset-item id="altar" src="assets/altar.glb"></a-asset-item>
+      <a-asset-item id="perchero" src="assets/perchero.glb"></a-asset-item>
+      <a-asset-item id="plantas" src="assets/plantas.glb"></a-asset-item>
+      <a-asset-item id="navmesh" src="assets/navmesh.glb"></a-asset-item>
 
-<a-assets>
-  <a-asset-item id="nino" src="assets/ninopt.glb"></a-asset-item>
-  <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
-  <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
-  <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
+      <audio id="audio1" src="assets/audio1.mp3"></audio>
+      <audio id="audio2" src="assets/audio2.mp3"></audio>
+      <audio id="audio3" src="assets/audio3.mp3"></audio>
+      <audio id="audio4" src="assets/audio4.mp3"></audio>
+      <audio id="audio5" src="assets/audio5.mp3"></audio>
+      <audio id="audio6" src="assets/audio6.mp3"></audio>
+      <audio id="audio7" src="assets/audio7.mp3"></audio>
+      <audio id="audio8" src="assets/audio8.mp3"></audio>
+      <audio id="audio9" src="assets/audio9.mp3"></audio>
 
-  <a-asset-item id="mesa" src="assets/mesa.glb"></a-asset-item>
-  <a-asset-item id="librero" src="assets/librero.glb"></a-asset-item>
-  <a-asset-item id="libros" src="assets/libros.glb"></a-asset-item>
-  <a-asset-item id="sillon" src="assets/sillon.glb"></a-asset-item>
-  <a-asset-item id="tele" src="assets/tele.glb"></a-asset-item>
-  <a-asset-item id="cuadros" src="assets/cuadros.glb"></a-asset-item>
-  <a-asset-item id="velasyplatos" src="assets/velasyplatos.glb"></a-asset-item>
-  <a-asset-item id="salon" src="assets/salon.glb"></a-asset-item>
-  <a-asset-item id="puertas" src="assets/puertas.glb"></a-asset-item>
-  <a-asset-item id="altar" src="assets/altar.glb"></a-asset-item>
-  <a-asset-item id="perchero" src="assets/perchero.glb"></a-asset-item>
-  <a-asset-item id="plantas" src="assets/plantas.glb"></a-asset-item>
-  <a-asset-item id="navmesh" src="assets/navmesh.glb"></a-asset-item>
+      <video id="video1" src="assets/video1.mp4"></video>
+      <video id="video2" src="assets/video2.mp4"></video>
+      <video id="video3" src="assets/video3.mp4"></video>
+      <video id="video4" src="assets/video4.mp4"></video>
+      
+      <video
+        id="introVideo"
+        src="assets/intro.mp4"
+        preload="auto"
+        crossorigin="anonymous"
+        playsinline
+        webkit-playsinline
+        muted
+        loop="false">
+      </video>
+      
+      <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
+    </a-assets>
 
-  <audio id="audio1" src="assets/audio1.mp3"></audio>
-  <audio id="audio2" src="assets/audio2.mp3"></audio>
-  <audio id="audio3" src="assets/audio3.mp3"></audio>
-  <audio id="audio4" src="assets/audio4.mp3"></audio>
-  <audio id="audio5" src="assets/audio5.mp3"></audio>
-  <audio id="audio6" src="assets/audio6.mp3"></audio>
-  <audio id="audio7" src="assets/audio7.mp3"></audio>
-  <audio id="audio8" src="assets/audio8.mp3"></audio>
-  <audio id="audio9" src="assets/audio9.mp3"></audio>
+    <a-entity
+      id="navmeshEntity"
+      gltf-model="#navmesh"
+      nav-mesh
+      visible="false">
+    </a-entity>
 
-  <video id="video1" src="assets/video1.mp4"></video>
-  <video id="video2" src="assets/video2.mp4"></video>
-  <video id="video3" src="assets/video3.mp4"></video>
-  <video id="video4" src="assets/video4.mp4"></video>
-<video
-    id="introVideo"
-    src="assets/intro.mp4"
-    autoplay
-    muted
-    playsinline
-    webkit-playsinline
-    preload="auto"
-    crossorigin="anonymous">
-</video>
-  <video id="cinematicVideo" preload="auto" playsinline webkit-playsinline></video>
-</a-assets>
+    <a-entity gltf-model="#mesa" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#librero" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#libros" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#salon" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#sillon" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#tele" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#cuadros" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#velasyplatos" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#puertas" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#altar" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
 
-<a-entity
-  id="navmeshEntity"
-  gltf-model="#navmesh"
-  nav-mesh
-  visible="false">
-</a-entity>
+    <a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
+    <a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+    <a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
 
-<a-entity gltf-model="#mesa" position="0 0 0"></a-entity>
-<a-entity gltf-model="#librero" position="0 0 0"></a-entity>
-<a-entity gltf-model="#libros" position="0 0 0"></a-entity>
-<a-entity gltf-model="#salon" position="0 0 0"></a-entity>
-<a-entity gltf-model="#sillon" position="0 0 0"></a-entity>
-<a-entity gltf-model="#tele" position="0 0 0"></a-entity>
-<a-entity gltf-model="#cuadros" position="0 0 0"></a-entity>
-<a-entity gltf-model="#velasyplatos" position="0 0 0"></a-entity>
-<a-entity gltf-model="#puertas" position="0 0 0"></a-entity>
-<a-entity gltf-model="#altar" position="0 0 0"></a-entity>
-<a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
-<a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
+    <a-video
+      src="#stormVideo"
+      position="-2.3 2.94 -3.1"
+      width="3.5"
+      height="2.3">
+    </a-video>
 
-<a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
-<a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
-<a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+    <a-video
+      src="#tvVideo"
+      position="-3.46 1.88 1.941"
+      rotation="0 180 0"
+      width="0.88"
+      height="0.74">
+    </a-video>
 
-<a-video
-  src="#stormVideo"
-  position="-2.3 2.94 -3.1"
-  width="3.5"
-  height="2.3">
-</a-video>
+    <a-box class="trigger" id="trigger1" position="-6.3 1 0.13" width="0.5" height="2" depth="1" visible="false" data-audio="audio1"></a-box>
+    <a-box class="trigger" id="trigger2" position="-5.5 1 -2.7" width="1" height="2" depth="0.5" visible="false" data-audio="audio4"></a-box>
+    <a-box class="trigger" id="trigger3" position="-6.3 1 -1.5" width="0.5" height="2" depth="0.7" visible="false" data-audio="audio2"></a-box>
+    <a-box class="trigger" id="trigger4" position="-3.45 1 2" width="2" height="2" depth="1" visible="false" data-video="video2"></a-box>
+    <a-box class="trigger" id="trigger5" position="-2.3 1 -2.7" width="3" height="2" depth="1" visible="false" data-video="video1"></a-box>
+    <a-box class="trigger" id="trigger6" position="0 1 -2.7" width="1" height="2" depth="1" visible="false" data-audio="audio6"></a-box>
+    <a-box class="trigger" id="trigger7" position="-1.6 1 2.7" width="1" height="2" depth="0.5" visible="false" data-video="video3"></a-box>
+    <a-box class="trigger" id="trigger8" position="0.25 1 2.7" width="1" height="2" depth="0.5" visible="false" data-audio="audio8"></a-box>
+    <a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="false" data-audio="audio9"></a-box>
 
-<a-video
-  src="#tvVideo"
-  position="-3.46 1.88 1.941"
-  rotation="0 180 0"
-  width="0.88"
-  height="0.74">
-</a-video>
+    <a-entity id="rig" position="0 0 0">
+      <a-entity id="player" gltf-model="#nino" visible="false"></a-entity>
 
-<a-box class="trigger" id="trigger1" position="-6.3 1 0.13" width="0.5" height="2" depth="1" visible="false" data-audio="audio1"></a-box>
-<a-box class="trigger" id="trigger2" position="-5.5 1 -2.7" width="1" height="2" depth="0.5" visible="false" data-audio="audio4"></a-box>
-<a-box class="trigger" id="trigger3" position="-6.3 1 -1.5" width="0.5" height="2" depth="0.7" visible="false" data-audio="audio2"></a-box>
-<a-box class="trigger" id="trigger4" position="-3.45 1 2" width="2" height="2" depth="1" visible="false" data-video="video2"></a-box>
-<a-box class="trigger" id="trigger5" position="-2.3 1 -2.7" width="3" height="2" depth="1" visible="false" data-video="video1"></a-box>
-<a-box class="trigger" id="trigger6" position="0 1 -2.7" width="1" height="2" depth="1" visible="false" data-audio="audio6"></a-box>
-<a-box class="trigger" id="trigger7" position="-1.6 1 2.7" width="1" height="2" depth="0.5" visible="false" data-video="video3"></a-box>
-<a-box class="trigger" id="trigger8" position="0.25 1 2.7" width="1" height="2" depth="0.5" visible="false" data-audio="audio8"></a-box>
-<a-box class="trigger" id="trigger9" position="2.2 1 2.7" width="1" height="2" depth="0.5" visible="false" data-audio="audio9"></a-box>
+      <a-entity id="cameraPivot" position="0 1.5 0">
+        <a-entity id="cameraYaw" position="0 0 0">
+          <a-entity id="cameraBoom" position="0 0 0">
+            <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
 
-<a-entity id="rig" position="0 0 0">
-  <a-entity id="player" gltf-model="#nino" visible="false"></a-entity>
+              <a-plane
+                id="introScreen"
+                visible="false"
+                position="0 0 -0.8"
+                width="4"
+                height="2.25"
+                material="src: #introVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
+              </a-plane>
 
-  <a-entity id="cameraPivot" position="0 1.5 0">
-    <a-entity id="cameraYaw" position="0 0 0">
-      <a-entity id="cameraBoom" position="0 0 0">
-        <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
+              <a-plane
+                id="cinematicScreen"
+                visible="false"
+                position="0 0 -0.8"
+                width="4"
+                height="2.25"
+                material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
+              </a-plane>
 
-          <a-plane
-            id="introScreen"
-            visible="false"
-            position="0 0 -0.8"
-            width="4"
-            height="2.25"
-            material="src: #introVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
-          </a-plane>
+              <a-plane
+                id="handSprite"
+                position="0 0 -1"
+                width="3"
+                height="1.7"
+                gif-texture-updater
+                material="src: #handGif; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
+              </a-plane>
 
-          <a-plane
-            id="cinematicScreen"
-            visible="false"
-            position="0 0 -0.8"
-            width="4"
-            height="2.25"
-            material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
-          </a-plane>
-
-          <a-plane
-            id="handSprite"
-            position="0 0 -1"
-            width="3"
-            height="1.7"
-            gif-texture-updater
-            material="src: #handGif; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false">
-          </a-plane>
-
+            </a-entity>
+          </a-entity>
         </a-entity>
       </a-entity>
     </a-entity>
-  </a-entity>
-</a-entity>
 
-<a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
-<a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
-<a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
+    <a-light type="point" color="#ff9d3d" intensity="1.2" distance="4" decay="2" position="2 2 0"></a-light>
+    <a-light type="point" color="#ffffff" intensity="2.5" distance="8" decay="2" position="-3.4 1.5 1"></a-light>
+    <a-light type="point" color="#ff9d3d" intensity="1.2" distance="8" decay="2" position="-6 2.2 0"></a-light>
 
-</a-scene>
+  </a-scene>
 
   <script>
     AFRAME.registerComponent('hud-quad', {
@@ -636,7 +636,8 @@
             lines.push('navigator.getGamepads(): sin pads activos');
           }
 
-          debugVR.textContent = lines.join('\n');
+          debugVR.textContent = lines.join('
+');
         }
 
         function getFlatViewBasis() {
@@ -1138,4 +1139,4 @@
   </script>
 
 </body>
-</html>
+      </html>
