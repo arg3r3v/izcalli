@@ -20,8 +20,16 @@
       background: #000;
       touch-action: none;
     }
-    body { position: fixed; inset: 0; }
-    a-scene { width: 100vw; height: 100vh; }
+
+    body {
+      position: fixed;
+      inset: 0;
+    }
+
+    a-scene {
+      width: 100vw;
+      height: 100vh;
+    }
 
     #joyLeft, #joyRight {
       position: absolute;
@@ -34,6 +42,7 @@
       transition: opacity 0.12s linear;
       pointer-events: auto;
     }
+
     #joyLeft { left: 20px; }
     #joyRight { right: 20px; }
 
@@ -76,8 +85,18 @@
   <div id="debugVR">Esperando datos del control...</div>
   <button id="fullscreenBtn" type="button">Pantalla completa</button>
 
-  <img id="handGif" src="assets/hand.gif" crossorigin="anonymous" loading="eager" style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
-  <canvas id="handFreezeCanvas" width="1080" height="1920" style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
+  <img
+    id="handGif"
+    src="assets/hand.gif"
+    crossorigin="anonymous"
+    loading="eager"
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
+
+  <canvas
+    id="handFreezeCanvas"
+    width="1080"
+    height="1920"
+    style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
 
   <a-scene
     vr-mode-ui="enabled: true"
@@ -94,6 +113,7 @@
       <a-asset-item id="mama" src="assets/mama.glb"></a-asset-item>
       <a-asset-item id="abuelitajusta" src="assets/abuelitajusta.glb"></a-asset-item>
       <a-asset-item id="abuelitamar" src="assets/abuelitamar.glb"></a-asset-item>
+
       <a-asset-item id="mesa" src="assets/mesa.glb"></a-asset-item>
       <a-asset-item id="librero" src="assets/librero.glb"></a-asset-item>
       <a-asset-item id="libros" src="assets/libros.glb"></a-asset-item>
@@ -129,22 +149,22 @@
 
     <a-entity id="navmeshEntity" gltf-model="#navmesh" nav-mesh visible="false"></a-entity>
 
-    <a-entity gltf-model="#mesa"></a-entity>
-    <a-entity gltf-model="#librero"></a-entity>
-    <a-entity gltf-model="#libros"></a-entity>
-    <a-entity gltf-model="#salon"></a-entity>
-    <a-entity gltf-model="#sillon"></a-entity>
-    <a-entity gltf-model="#tele"></a-entity>
-    <a-entity gltf-model="#cuadros"></a-entity>
-    <a-entity gltf-model="#velasyplatos"></a-entity>
-    <a-entity gltf-model="#puertas"></a-entity>
-    <a-entity gltf-model="#altar"></a-entity>
-    <a-entity gltf-model="#perchero"></a-entity>
-    <a-entity gltf-model="#plantas"></a-entity>
+    <a-entity gltf-model="#mesa" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#librero" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#libros" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#salon" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#sillon" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#tele" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#cuadros" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#velasyplatos" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#puertas" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#altar" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#perchero" position="0 0 0"></a-entity>
+    <a-entity gltf-model="#plantas" position="0 0 0"></a-entity>
 
-    <a-entity gltf-model="#mama" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
-    <a-entity gltf-model="#abuelitajusta" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
-    <a-entity gltf-model="#abuelitamar" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+    <a-entity gltf-model="#mama" position="0 0 0" animation-mixer="clip: talk; loop: repeat; timeScale: 1"></a-entity>
+    <a-entity gltf-model="#abuelitajusta" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
+    <a-entity gltf-model="#abuelitamar" position="0 0 0" animation-mixer="clip: talkabu; loop: repeat; timeScale: 1"></a-entity>
 
     <a-video src="#stormVideo" position="-2.3 2.94 -3.1" width="3.5" height="2.3"></a-video>
     <a-video src="#tvVideo" position="-3.46 1.88 1.941" rotation="0 180 0" width="0.88" height="0.74"></a-video>
@@ -161,9 +181,10 @@
 
     <a-entity id="rig" position="0 0 0">
       <a-entity id="player" gltf-model="#nino" visible="false"></a-entity>
+
       <a-entity id="cameraPivot" position="0 1.5 0">
-        <a-entity id="cameraYaw">
-          <a-entity id="cameraBoom">
+        <a-entity id="cameraYaw" position="0 0 0">
+          <a-entity id="cameraBoom" position="0 0 0">
             <a-entity id="gameCamera" camera look-controls="pointerLockEnabled: false; reverseMouseDrag: false">
               <a-plane id="introScreen" visible="false" position="0 0 -0.8" width="4" height="2.25" material="src: #introVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false"></a-plane>
               <a-plane id="cinematicScreen" visible="false" position="0 0 -0.8" width="4" height="2.25" material="src: #cinematicVideo; shader: flat; transparent: true; side: double; depthTest: false; depthWrite: false"></a-plane>
@@ -221,8 +242,6 @@
       setupFullscreenHandlers();
 
       const scene = document.querySelector('a-scene');
-      const debugVR = document.querySelector('#debugVR');
-
       const rig = document.querySelector('#rig');
       const player = document.querySelector('#player');
       const camera = document.querySelector('#gameCamera');
@@ -237,6 +256,7 @@
       const handFreezeCtx = handFreezeCanvas.getContext('2d', { alpha: true });
       const stormVideo = document.getElementById('stormVideo');
       const tvVideo = document.getElementById('tvVideo');
+      const debugVR = document.getElementById('debugVR');
 
       const activatedTriggers = new Set();
       let cinematicPlaying = false;
@@ -276,7 +296,10 @@
       ['mousemove','mousedown','mouseup','keydown','keyup','touchstart','touchmove','click','wheel','scroll','pointerdown','pointermove'].forEach(evt => {
         window.addEventListener(evt, activity, { passive: true });
       });
-      document.addEventListener('visibilitychange', () => { if (!document.hidden) activity(); });
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) activity();
+      });
 
       function unlockAmbientVideos() {
         [stormVideo, tvVideo].forEach(videoEl => {
@@ -309,15 +332,6 @@
       function restoreAnimatedHand() {
         handFrozen = false;
         applyHandMaterial('#handGif');
-      }
-
-      function showHand() {
-        handSprite.setAttribute('visible', 'true');
-        restoreAnimatedHand();
-      }
-
-      function hideHand() {
-        handSprite.setAttribute('visible', 'false');
       }
 
       function angleDifference(a, b) {
@@ -423,7 +437,7 @@
           introVideo.currentTime = 0;
           introVideo.muted = false;
           introVideo.removeAttribute('muted');
-          introVideo.volume = 1;
+          introVideo.volume = 1.0;
           introVideo.load();
           introVideo.play().catch(() => {});
         }
@@ -454,6 +468,7 @@
         if (keys['s'] || keys['arrowdown']) input.y += 1;
         if (keys['a'] || keys['arrowleft']) input.x -= 1;
         if (keys['d'] || keys['arrowright']) input.x += 1;
+
         input.x += nippleVector.x;
         input.y -= nippleVector.y;
 
@@ -488,17 +503,17 @@
         if (input.length() > 0) {
           input.normalize();
           const basis = getFlatViewBasis();
-          const moveVector = new THREE.Vector3()
-            .addScaledVector(basis.forward, -input.y)
-            .addScaledVector(basis.right, input.x);
+          const moveVector = new THREE.Vector3();
+          moveVector.addScaledVector(basis.forward, -input.y);
+          moveVector.addScaledVector(basis.right, input.x);
 
           const totalMove = moveVector.clone().multiplyScalar(speed * delta);
           const stepMove = totalMove.clone().divideScalar(8);
           let currentPosition = rig.object3D.position.clone();
 
           for (let i = 0; i < 8; i++) {
-            let testFull = currentPosition.clone().add(stepMove);
-            let origin = testFull.clone();
+            const testFull = currentPosition.clone().add(stepMove);
+            const origin = testFull.clone();
             origin.y += 5;
             raycaster.set(origin, downVector);
             const intersects = raycaster.intersectObject(navMeshEl.object3D, true);
@@ -518,6 +533,7 @@
 
           if (!moving) {
             handSprite.setAttribute('visible', 'true');
+            restoreAnimatedHand();
             moving = true;
           }
         } else if (moving) {
@@ -544,11 +560,7 @@
       function hideIntroAndStartExperience() {
         if (introScreen) introScreen.setAttribute('visible', 'false');
         if (introVideo) introVideo.pause();
-        if (!started) {
-          started = true;
-          hideHand();
-          tick();
-        }
+        tick();
       }
 
       if (handGif) {
@@ -574,18 +586,9 @@
         introVideo.onended = hideIntroAndStartExperience;
       }
 
-      if (navMeshEl) {
-        navMeshEl.addEventListener('model-loaded', () => {
-          if (!started) {
-            started = true;
-            hideHand();
-            tick();
-          }
-        });
-      }
-
       unlockAmbientVideos();
       resetIdleTimer();
+      requestAnimationFrame(tick);
     });
   </script>
 </body>
