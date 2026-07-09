@@ -176,7 +176,6 @@
         crossorigin="anonymous"
         playsinline
         webkit-playsinline
-        muted
         loop="false">
       </video>
       
@@ -636,8 +635,7 @@
             lines.push('navigator.getGamepads(): sin pads activos');
           }
 
-          debugVR.textContent = lines.join('
-');
+          debugVR.textContent = lines.join('\n');
         }
 
         function getFlatViewBasis() {
@@ -983,7 +981,7 @@
                 };
 
                 tryAxis('x', stepMove.x);
-                tryAxis('z', stepMove.z);
+                tryAxis('z', stepMove.x);
               }
             }
 
@@ -1062,16 +1060,22 @@
         if (introScreen && introVideo) {
           introScreen.setAttribute('visible', 'true');
           introVideo.loop = false;
-          introVideo.muted = true;
-          introVideo.setAttribute('muted', '');
+          introVideo.playsInline = true;
           introVideo.setAttribute('playsinline', '');
           introVideo.setAttribute('webkit-playsinline', '');
           introVideo.load();
 
           const playIntro = () => {
+            introVideo.muted = false;
+            introVideo.removeAttribute('muted');
             const p = introVideo.play();
             if (p && typeof p.catch === 'function') {
-              p.catch(() => {});
+              p.catch(err => {
+                console.warn('Autoplay con audio bloqueado, intentando con muted:', err);
+                introVideo.muted = true;
+                introVideo.setAttribute('muted', '');
+                introVideo.play().catch(() => {});
+              });
             }
           };
 
@@ -1139,4 +1143,4 @@
   </script>
 
 </body>
-      </html>
+</html>
