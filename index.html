@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IZCALLI v02.7</title>
+  <title>IZCALLI v02.8</title>
 
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
@@ -60,6 +60,44 @@
       border-radius: 8px;
       max-width: 45vw;
       pointer-events: none;
+      display: none;
+    }
+
+    #loadingOverlay,
+    #startOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px;
+      box-sizing: border-box;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #startOverlay {
+      display: none;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    #startOverlay.is-visible { display: flex; }
+    #loadingOverlay.is-hidden { display: none; }
+
+    #startButton {
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      background: #fff;
+      color: #111;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     #fullscreenBtn {
@@ -80,6 +118,11 @@
 </head>
 
 <body>
+  <div id="loadingOverlay" role="status">Cargando experiencia…</div>
+  <div id="startOverlay" role="dialog" aria-modal="true" aria-labelledby="startMessage">
+    <p id="startMessage">Toca para iniciar con audio</p>
+    <button id="startButton" type="button">Iniciar</button>
+  </div>
   <div id="joyLeft"></div>
   <div id="joyRight"></div>
   <div id="debugVR">Esperando datos del control...</div>
@@ -271,8 +314,11 @@
       const scene = document.querySelector('a-scene');
       const debugVR = document.querySelector('#debugVR');
       setupFullscreenHandlers();
+      let sceneSetupStarted = false;
 
       function setupWhenSceneReady() {
+        if (sceneSetupStarted) return;
+        sceneSetupStarted = true;
         const rig = document.querySelector('#rig');
         const player = document.querySelector('#player');
         const camera = document.querySelector('#gameCamera');
@@ -289,6 +335,9 @@
         const tvVideo = document.getElementById('tvVideo');
         const joyLeft = document.getElementById('joyLeft');
         const joyRight = document.getElementById('joyRight');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const startOverlay = document.getElementById('startOverlay');
+        const startButton = document.getElementById('startButton');
 
         const activatedTriggers = new Set();
         let cinematicPlaying = false;
@@ -298,6 +347,8 @@
         let handFrozen = false;
         let introFinished = false;
         let navmeshReady = false;
+        let animationFrameId = null;
+        let resettingExperience = false;
 
         const IDLE_LIMIT = 3 * 60 * 1000;
         let idleTimer = null;
@@ -333,7 +384,7 @@
         }
 
         function registerActivity() {
-          resetIdleTimer();
+          if (!resettingExperience) resetIdleTimer();
         }
 
         ['mousemove','mousedown','mouseup','keydown','keyup','touchstart','touchmove','click','wheel','scroll','pointerdown','pointermove'].forEach(evt => {
@@ -487,22 +538,125 @@
           startAmbientVideo(tvVideo);
         }
 
+        function hideLoadingOverlay() {
+          if (loadingOverlay) loadingOverlay.classList.add('is-hidden');
+        }
+
+        function showStartOverlay() {
+          if (startOverlay) startOverlay.classList.add('is-visible');
+        }
+
+        function hideStartOverlay() {
+          if (startOverlay) startOverlay.classList.remove('is-visible');
+        }
+
+        function configureIntroAudio(muted) {
+          if (!introVideo) return;
+          introVideo.muted = muted;
+          introVideo.volume = 1.0;
+          if (muted) introVideo.setAttribute('muted', '');
+          else introVideo.removeAttribute('muted');
+        }
+
+        function playVideo(videoEl) {
+          try {
+            const result = videoEl.play();
+            return result && typeof result.then === 'function'
+              ? result
+              : Promise.resolve();
+          } catch (error) {
+            return Promise.reject(error);
+          }
+        }
+
+        function scheduleTick() {
+          if (started && animationFrameId === null) {
+            animationFrameId = requestAnimationFrame(tick);
+          }
+        }
+
+        function startExperience() {
+          if (!introFinished || !navmeshReady || started) return;
+          started = true;
+          snapRigToNavmesh();
+          hideHand();
+          scheduleTick();
+        }
+
+        function startIntro(userInitiated) {
+          if (!introVideo) {
+            introFinished = true;
+            hideLoadingOverlay();
+            startExperience();
+            return;
+          }
+
+          introFinished = false;
+          if (introScreen) introScreen.setAttribute('visible', 'true');
+          introVideo.pause();
+          introVideo.currentTime = 0;
+          introVideo.loop = false;
+          introVideo.playsInline = true;
+          introVideo.setAttribute('playsinline', '');
+          introVideo.setAttribute('webkit-playsinline', '');
+
+          const startWithAudio = () => {
+            configureIntroAudio(false);
+            return playVideo(introVideo);
+          };
+
+          const startMutedThenAsk = () => {
+            configureIntroAudio(true);
+            return playVideo(introVideo)
+              .catch(() => {})
+              .finally(() => {
+                hideLoadingOverlay();
+                showStartOverlay();
+              });
+          };
+
+          if (userInitiated) {
+            startWithAudio()
+              .then(() => {
+                hideLoadingOverlay();
+                hideStartOverlay();
+              })
+              .catch(() => {
+                hideLoadingOverlay();
+                showStartOverlay();
+              });
+          } else {
+            startWithAudio()
+              .then(() => {
+                hideLoadingOverlay();
+                hideStartOverlay();
+              })
+              .catch(startMutedThenAsk);
+          }
+        }
+
         function resetExperience() {
+          resettingExperience = true;
+          clearTimeout(idleTimer);
+          if (animationFrameId !== null) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+          }
+
           activatedTriggers.clear();
           cinematicPlaying = false;
           moving = false;
           started = false;
-          playerModelReady = false;
           handFrozen = false;
           introFinished = false;
-          navmeshReady = false;
+          navmeshReady = Boolean(navMeshEl.getObject3D('mesh'));
           lastHeadYaw = null;
           nippleVector.set(0, 0);
           lookInput.set(0, 0);
           hideHand();
+          hideStartOverlay();
 
           if (cinematicScreen) cinematicScreen.setAttribute('visible', 'false');
-          if (introScreen) introScreen.setAttribute('visible', 'true');
 
           if (cinematicVideo) {
             cinematicVideo.pause();
@@ -510,23 +664,22 @@
             cinematicVideo.load();
           }
 
+          document.querySelectorAll('audio[id^="audio"], video[id^="video"]').forEach(media => {
+            media.pause();
+            media.currentTime = 0;
+          });
+
           if (introVideo) {
             introVideo.pause();
             introVideo.currentTime = 0;
-            introVideo.muted = false;
-            introVideo.removeAttribute('muted');
-            introVideo.volume = 1.0;
-            introVideo.load();
-            const p = introVideo.play();
-            if (p && typeof p.catch === 'function') {
-              p.catch(() => {});
-            }
           }
 
           if (rig) rig.setAttribute('position', '0 0 0');
           if (player) player.object3D.rotation.y = 0;
 
           unlockAmbientVideos();
+          startIntro(false);
+          resettingExperience = false;
           resetIdleTimer();
         }
 
@@ -619,7 +772,8 @@
         }
 
         function tick() {
-          resetIdleTimer();
+          animationFrameId = null;
+          if (!started) return;
 
           const now = performance.now();
           const delta = (now - lastTime) / 1000;
@@ -628,7 +782,7 @@
           updateVRDebug();
 
           if (cinematicPlaying) {
-            requestAnimationFrame(tick);
+            scheduleTick();
             return;
           }
 
@@ -674,6 +828,7 @@
           }
 
           if (input.length() > 0) {
+            registerActivity();
             input.normalize();
             const basis = getFlatViewBasis();
             const moveVector = new THREE.Vector3();
@@ -762,68 +917,57 @@
             });
           }
 
-          requestAnimationFrame(tick);
+          scheduleTick();
         }
 
         function hideIntroAndStartExperience() {
           if (introScreen) introScreen.setAttribute('visible', 'false');
           if (introVideo) introVideo.pause();
           introFinished = true;
-          if (navmeshReady && !started) {
-            started = true;
-            snapRigToNavmesh();
-            hideHand();
-            tick();
-          }
+          hideStartOverlay();
+          startExperience();
         }
 
         if (introScreen && introVideo) {
-          introScreen.setAttribute('visible', 'true');
-          introVideo.loop = false;
-          introVideo.playsInline = true;
-          introVideo.setAttribute('playsinline', '');
-          introVideo.setAttribute('webkit-playsinline', '');
-          introVideo.muted = false;
-          introVideo.removeAttribute('muted');
-          introVideo.volume = 1.0;
-          introVideo.load();
-
-          const playIntro = () => {
-            introVideo.muted = false;
-            introVideo.removeAttribute('muted');
-            introVideo.volume = 1.0;
-            const p = introVideo.play();
-            if (p && typeof p.catch === 'function') p.catch(err => console.warn('Autoplay con audio bloqueado:', err));
-          };
-
-          if (introVideo.readyState >= 2) playIntro();
-          else {
-            introVideo.addEventListener('canplay', playIntro, { once: true });
-            introVideo.addEventListener('loadedmetadata', playIntro, { once: true });
-            introVideo.addEventListener('loadeddata', playIntro, { once: true });
-          }
-
-          introVideo.onended = hideIntroAndStartExperience;
+          introVideo.addEventListener('ended', hideIntroAndStartExperience);
+          introVideo.addEventListener('error', () => {
+            console.warn('No se pudo cargar el video de introducción. Se inicia la experiencia.');
+            hideLoadingOverlay();
+            hideIntroAndStartExperience();
+          });
         } else {
           introFinished = true;
         }
 
         navMeshEl.addEventListener('model-loaded', () => {
           navmeshReady = true;
-          if (introFinished && !started) {
-            started = true;
-            snapRigToNavmesh();
-            hideHand();
-            tick();
-          }
+          startExperience();
         });
 
+        if (navMeshEl.getObject3D('mesh')) {
+          navmeshReady = true;
+        }
+
+        if (startButton) {
+          startButton.addEventListener('click', () => {
+            registerActivity();
+            startIntro(true);
+          });
+        }
+
         unlockAmbientVideos();
+        startIntro(false);
         resetIdleTimer();
       }
 
       if (scene.hasLoaded) setupWhenSceneReady();
       else scene.addEventListener('loaded', setupWhenSceneReady);
+
+      // Si algún recurso secundario tarda demasiado, la introducción no queda
+      // bloqueada esperando el resto de los modelos de la escena.
+      window.setTimeout(() => {
+        if (!sceneSetupStarted) setupWhenSceneReady();
+      }, 8000);
     });
   </script>
 </body>
